@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-label="Default tutor profile image">
+  <defs>
+    <linearGradient id="bg" x1="16" y1="16" x2="144" y2="144" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F7F3EA"/>
+      <stop offset="1" stop-color="#DDEBE1"/>
+    </linearGradient>
+    <linearGradient id="face" x1="50" y1="34" x2="110" y2="126" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F6D7BA"/>
+      <stop offset="1" stop-color="#D7A987"/>
+    </linearGradient>
+  </defs>
+  <rect width="160" height="160" rx="80" fill="url(#bg)"/>
+  <circle cx="80" cy="67" r="34" fill="url(#face)"/>
+  <path d="M38 146c8-30 28-45 42-45s34 15 42 45" fill="#315241" opacity=".92"/>
+  <path d="M47 56c8-24 26-34 46-26 16 7 25 20 22 42-11-15-26-24-47-24-8 0-15 3-21 8Z" fill="#2F3D35"/>
+  <circle cx="68" cy="69" r="4" fill="#2F3D35"/>
+  <circle cx="93" cy="69" r="4" fill="#2F3D35"/>
+  <path d="M70 86c7 6 16 6 23 0" fill="none" stroke="#2F3D35" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="126" cy="38" r="11" fill="#7BAE8B" opacity=".75"/>
+  <circle cx="39" cy="118" r="7" fill="#E7B85F" opacity=".75"/>
+</svg>
