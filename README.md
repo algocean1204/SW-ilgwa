@@ -8,7 +8,7 @@
 
 면접 스토리: https://algocean1204.github.io/SW-ilgwa/ptplo/
 
-이 README는 레포와 파이프라인을 적는다. 역할과 선택 이유는 위 페이지에 있다.
+페이지에서 PDF로 내보낼 수 있다. 이 README는 레포와 파이프라인을 적는다.
 
 ## 시스템 아키텍처
 

@@ -1,43 +1,46 @@
 (() => {
+  const stage = document.getElementById("stage");
+  const btn = document.getElementById("export-pdf");
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const links = [...document.querySelectorAll('nav a[href^="#"]')];
-  const sections = links
-    .map((a) => document.querySelector(a.getAttribute("href")))
-    .filter(Boolean);
 
-  const mark = (id) => {
-    for (const a of links) {
-      const on = a.getAttribute("href") === `#${id}`;
-      if (on) a.setAttribute("aria-current", "page");
-      else a.removeAttribute("aria-current");
-    }
+  const fit = () => {
+    if (!stage) return;
+    const sheet = stage.querySelector(".sheet");
+    if (!sheet) return;
+    stage.style.transform = "";
+    stage.style.marginBottom = "";
+    const raw = sheet.offsetWidth;
+    const scale = Math.min(1, (window.innerWidth - 24) / raw);
+    if (scale >= 0.999) return;
+    stage.style.transform = `scale(${scale})`;
+    stage.style.marginBottom = `${Math.round(stage.scrollHeight * (scale - 1))}px`;
   };
 
-  if (!("IntersectionObserver" in window) || sections.length === 0) return;
+  const printFit = () => {
+    if (!stage) return;
+    stage.style.transform = "";
+    stage.style.marginBottom = "";
+  };
 
-  const io = new IntersectionObserver(
-    (entries) => {
-      const visible = entries
-        .filter((e) => e.isIntersecting)
-        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-      if (visible?.target?.id) mark(visible.target.id);
-    },
-    { rootMargin: "-20% 0px -65% 0px", threshold: [0, 0.25, 0.6] }
-  );
+  btn?.addEventListener("pointerdown", () => {
+    btn.style.opacity = "0.7";
+  });
+  btn?.addEventListener("pointerup", () => {
+    btn.style.opacity = "";
+  });
+  btn?.addEventListener("pointercancel", () => {
+    btn.style.opacity = "";
+  });
+  btn?.addEventListener("click", () => {
+    printFit();
+    window.print();
+  });
 
-  for (const el of sections) io.observe(el);
+  window.addEventListener("beforeprint", printFit);
+  window.addEventListener("afterprint", fit);
+  window.addEventListener("resize", () => {
+    if (!reduce) fit();
+  });
 
-  if (reduce) return;
-
-  for (const a of links) {
-    a.addEventListener("pointerdown", () => {
-      a.style.opacity = "0.65";
-    });
-    a.addEventListener("pointerup", () => {
-      a.style.opacity = "";
-    });
-    a.addEventListener("pointercancel", () => {
-      a.style.opacity = "";
-    });
-  }
+  fit();
 })();
