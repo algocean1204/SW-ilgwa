@@ -1,69 +1,135 @@
 # 일과 · ilgwa
 
-주제를 하나 넣으면 강의, 슬라이드, 음성 수업, 시험, 노트까지 만들어 주는 AI 학습 데스크입니다.
+주제를 넣으면 강의·슬라이드·음성 수업·시험·노트까지 만드는 AI 학습 과외 서비스.
 
 데모: https://algocean1204.github.io/SW-ilgwa/
 
 로그인 없이 열립니다. 파이썬, Rust, 운영체제 3과목이 슬라이드와 음성 수업, 시험, 노트까지 미리 채워져 있어서 바로 눌러 볼 수 있습니다.
 
+면접 스토리: https://algocean1204.github.io/SW-ilgwa/ptplo/
+
+이 README는 레포와 파이프라인을 적는다. 역할과 선택 이유는 위 페이지에 있다.
+
 ## 시스템 아키텍처
 
 ![시스템 아키텍처](docs/architecture.png)
 
-화면은 React SPA(CloudFront + S3), 인증과 결제, 워크플로우 오케스트레이션은 Spring, AI와 RAG는 FastAPI가 맡습니다. 데이터는 RDS PostgreSQL과 Qdrant에 두고 추론은 Modal GPU에서 돌립니다. Claude는 폴백입니다. 전체는 AWS VPC 안에 있습니다.
+화면은 React SPA, 인증·결제·DB는 Spring, AI는 FastAPI가 맡습니다. 추론은 Modal GPU에서 Qwen을 직접 서빙합니다.
 
-## 올린 PDF가 그대로 교재가 됩니다
+## 서버 구성 - MSA구조
 
-교재 PDF를 업로드하면 OCR을 거쳐 Qdrant에 적재합니다. 그 벡터가 강의와 시험, 노트를 만들 때의 근거 컨텍스트가 됩니다. 파이프라인은 LangGraph로 짰습니다.
+인증·결제·DB 같은 코어는 Spring, AI는 Python으로 구현하려고 FastAPI를 추가했다. 책임을 나누기 위해 서버를 완전 분리했다.
 
-```text
-PDF 업로드
-  → ① 페이지 타입 분류 
-  → ② OCR 텍스트 추출 
-  → ③ 품질 게이트 ──실패──▶ 폴백 엔진으로 재추출
-  → ④ 후처리 (헤더·푸터 제거, 하이픈 복원, 표·수식 정규화)
-  → ⑤ 섹션 기반 청킹 
-  → ⑥ BGE-M3 임베딩 
-  → ⑦ Qdrant 벡터DB 업서트
+- 프론트 — 학습 UI
+- Spring — 인증, 결제, DB 접근
+- FastAPI — AI 파이프라인 (설계·구현 담당)
+
+## Modal GPU 서빙
+
+Qwen3.6-27B를 Modal GPU에 올리고 vLLM으로 직접 서빙한다. continuous batching과 슬라이드·퀴즈·노트·과제 병렬 호출로 대기 시간을 줄였다. 클라우드 API는 폴백용이다.
+
+- 실측 — 강의 생성 순차 462s → 병렬 120s
+- 폴백 — Modal 실패 시 Gemini 3.5 Flash → Sonnet 4.5 순
+
+## 사용 기술들과 선택 근거
+
+양산은 Modal GPU의 Qwen, 클라우드 API는 폴백용으로만 썼다.
+
+- LangGraph — OCR 품질게이트·강의 생성·출제 재시도 분기를 StateGraph로 묶음
+- Qwen3.6-27B — Modal GPU + vLLM 서빙. 배치 스케줄링과 병렬 처리로 속도 효율을 높임
+- 폴백 — Modal 실패 시 Gemini 3.5 Flash → Sonnet 4.5 순. API 키는 테스트·폴백용
+- OCR — PDF는 Marker로 추출, 품질 게이트 실패 페이지만 MinerU로 재추출한 뒤 청킹
+- Qdrant — OCR 청크를 BGE-M3 dense(1024) + sparse로 저장. 검색은 둘을 병렬로 돌린 뒤 합쳐, 그 문단을 강의 생성 컨텍스트로 주입
+- Qwen3-TTS — 강의 대본을 voice cloning으로 합성
+- Qwen3-ASR — 음성 질문 인식
+- 슬라이드 후처리 — FastAPI에서 하이라이트·iframe sandbox. 
+- 템플릿 — 프레임·난이도는 코드가 고정하고, AI는 `{{빈칸}}`만 채움
+
+## 파이프라인들 흐름
+
+### OCR (교재 → 검색 인덱스)
+
+```mermaid
+flowchart TD
+  pdf[PDF] --> classify[페이지 분류]
+  classify --> extract[Marker 추출]
+  extract --> gate[품질 게이트]
+  gate -->|통과 / 전부 실패| post[후처리]
+  gate -->|일부 실패| mineru[MinerU 재추출]
+  mineru --> post
+  post --> chunk[청킹]
+  chunk --> embed[BGE-M3 임베딩]
+  embed --> qdrant[Qdrant 저장]
 ```
 
-검색은 하이브리드 RAG입니다. Qdrant에서 Dense와 Sparse에 `bge-reranker-v2-m3`를 사용해 관련 문단을 먼저 찾고, 그 문단을 근거 컨텍스트로 넣습니다. 환각을 줄이려고 넣은 장치입니다. 품질 게이트를 통과하지 못한 문서는 폴백 엔진이 자동으로 다시 추출합니다. PDF 래스터화와 이미지 정규화는 Rust PyO3 휠(`lib-rust`)이 FastAPI 프로세스 안에서 직접 처리합니다.
+### 강의 생성
 
-## 모델은 Modal B200에서 직접 돌립니다
-
-| 계층 | 역할 |
-|---|---|
-| Frontend (사용자 브라우저) | 학습 요청과 결과 확인, nh3 정제와 iframe 샌드박스를 거친 보안 렌더링 |
-| Backend (Spring Boot) | 인증·권한, 결제, 학습 데이터 적재, 워크플로우 오케스트레이션 |
-| AI Engine (Modal B200) | 자체 모델 상주로 Cold Start 감소, 컨텍스트 분할 병렬 추론, ×4 동시 출제와 교차검증 |
-
-자체 모델을 Modal B200에 상주시켜 구동합니다. 외부 LLM API 호출은 없습니다. 과금이 GPU 시간 단위라 강의 1건을 만드는 데 $0.38이 듭니다.
-
-출제는 이 순서로 흐릅니다.
-
-```
-자료 분석 → 출제 계획 → 문제 생성 (×4 병렬) → 오답 구성 → 정답 해설 → 교차 검증
+```mermaid
+flowchart TD
+  ctx[컨텍스트 준비] --> gen[산출물 생성]
+  gen --> slides[슬라이드]
+  gen --> quiz[퀴즈]
+  gen --> note[노트]
+  gen --> hw[과제]
+  slides --> tts[Qwen3-TTS voice cloning]
+  tts --> audio[음성파일]
 ```
 
-문제 생성 단계만 에이전트 4개가 동시에 돌고, 교차 검증에서 걸리면 자동 수정 루프가 다시 돕니다.
+슬라이드·퀴즈·노트·과제는 동시에 만들고, 음성은 슬라이드 대본을 받은 뒤 합성한다.
 
-## 구조는 코드가 정하고, AI는 `{{빈칸}}`만 채웁니다
+### 퀴즈
 
-프레임과 visual 9종, 난이도를 코드가 plan-first로 미리 고정합니다. 템플릿 라이브러리에는 디자인 카테고리 16종과 모의고사 문제 유형 20종이 들어 있습니다. AI가 손대는 건 `{{빈칸}}`뿐입니다.
-
-```jsonc
-// ChapterStudio_V1 · concept_code (강의 슬라이드 템플릿)
-{
-  "slide_idx": 0,
-  "category": "code",
-  "title": "{{핵심_개념}}",
-  "narration": "{{설명_200~360자}}",
-  "visual": { "type": "step_flow", "data": "{{시각_데이터}}" },
-  "checkpoint": "{{성취도_체크}}"
-}
+```mermaid
+flowchart TD
+  outline[슬라이드 플랜] --> gen[퀴즈 생성]
+  gen --> repair[품질 보강]
+  repair --> balance[정답 위치 균등]
+  balance --> verify[검증]
+  verify --> save[저장]
 ```
 
-덕분에 강의 16종과 문제 20종의 품질 일관성이 요청마다 유지됩니다. 모델을 새로 학습시키지 않으니 추가 학습비는 $0입니다.
+### 노트
+
+```mermaid
+flowchart TD
+  gen[노트 생성] --> md[마크다운 형식으로 포매팅]
+  md --> save[저장]
+```
+
+### 과제
+
+```mermaid
+flowchart TD
+  outline[슬라이드 플랜] --> gen[과제 생성]
+  gen --> save[저장]
+```
+
+채점은 생성 그래프 밖. Spring이 제출을 넘기면 Claude → 실패 시 Gemini, 결과를 콜백한다.
+
+### 시험 출제
+
+```mermaid
+flowchart TD
+  src[자료 분석] --> plan[출제 계획]
+  plan --> q[문제 생성]
+  q --> dist[오답]
+  dist --> ans[해설]
+  ans --> verify[교차 검증]
+  verify -->|통과| out[출력]
+  verify -->|실패| repair[교정]
+  repair -->|교정 가능| verify
+  repair -->|불가| q
+```
+
+### 음성
+
+```mermaid
+flowchart TD
+  slides[슬라이드] --> script[대본]
+  script --> tts[Qwen3-TTS voice cloning]
+  ref[참조음성] --> tts
+  tts --> audio[음성파일]
+```
 
 ## 성능 (실측)
 
@@ -71,15 +137,7 @@ PDF 업로드
 |---|---|
 | 초기 콜드 스타트 | ~12.4s |
 | 모델 사전 로드 시 | ~0.8s |
-| API 오버헤드 | 0.1s 미만 |
-| 강의 생성 시간 | 순차 462s → 병렬 120s (74% ↓) |
-| 학습 준비 리드타임 | 45% 단축 |
-
-콜드 스타트 두 값의 차이는 모델을 Modal 스토리지에 미리 올려 둔 결과입니다.
-
-## 기술 스택
-
-`React` · `Vite` · `TypeScript` · `Spring Boot` · `Nginx` · `Redis` · `FastAPI` · `Celery` · `Qdrant` · `Modal GPU (B200)` · `Qwen3-TTS` · `Whisper-v3` · `BGE-M3` · `PostgreSQL 16` · `AWS (CloudFront·S3·EC2·RDS)` · `Claude (폴백)`
+| 강의 생성 | 순차 462s → 병렬 120s |
 
 ## 발표 자료
 
@@ -109,4 +167,4 @@ PDF 업로드
 
 ## 데모에서 되는 것
 
-위 데모는 백엔드 없이 도는 정적 박제본입니다. "AI 생성" 기능만 꺼져 있고, 미리 만들어 둔 3과목의 강의 열람, 음성 수업, 모의고사 응시, 노트, 과제는 그대로 해 볼 수 있습니다.
+위 데모는 백엔드 없이 도는 정적 박제본입니다. AI 생성 기능만 꺼져 있고, 미리 만들어 둔 3과목의 강의 열람, 음성 수업, 모의고사 응시, 노트, 과제는 그대로 해 볼 수 있습니다.

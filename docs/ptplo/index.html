@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>일과 · ilgwa — 설계·AI 서버</title>
+  <meta name="description" content="일과 프로젝트에서 설계와 FastAPI AI 서버를 맡은 기록. Modal GPU에서 Qwen3.6-27B를 서빙하고 강의 생성 462초를 120초로 줄였다." />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <a class="skip" href="#main">본문으로</a>
+  <header class="top">
+    <p class="brand">일과 · ilgwa</p>
+    <nav aria-label="페이지">
+      <a href="#role">역할</a>
+      <a href="#arch">구성</a>
+      <a href="#gpu">서빙</a>
+      <a href="#cases">문제</a>
+      <a href="#flow">흐름</a>
+    </nav>
+    <p class="ext">
+      <a href="https://algocean1204.github.io/SW-ilgwa/">데모</a>
+      <a href="https://github.com/algocean1204/SW-ilgwa">GitHub</a>
+    </p>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="role">
+      <h1>설계와 FastAPI AI 서버를 맡았다.</h1>
+      <p class="lead">주제를 넣으면 강의, 슬라이드, 음성 수업, 시험, 노트가 나온다. 인증·결제·DB는 Spring이고, AI 파이프라인은 이쪽이다.</p>
+      <dl class="meta">
+        <div>
+          <dt>기간</dt>
+          <dd>2026.04.19 – 2026.05.29</dd>
+        </div>
+        <div>
+          <dt>인원</dt>
+          <dd>2명</dd>
+        </div>
+        <div>
+          <dt>내 파트</dt>
+          <dd>설계, FastAPI AI</dd>
+        </div>
+        <div>
+          <dt>팀</dt>
+          <dd>Spring 인증·결제·DB</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section id="arch">
+      <h2>서버 구성</h2>
+      <p>인증·결제·DB는 Spring에 두고, AI는 Python이 필요해서 FastAPI를 추가했다. 책임을 나누려고 서버를 갈라 두었다.</p>
+      <ul class="split">
+        <li>프론트 — 학습 UI</li>
+        <li>Spring — 인증, 결제, DB 접근</li>
+        <li>FastAPI — AI 파이프라인</li>
+      </ul>
+      <figure>
+        <img src="./architecture.png" alt="클라이언트, Spring EC2, FastAPI EC2, RDS, Qdrant, Modal GPU, 폴백 API로 나뉜 시스템 구성" width="1600" height="1200" />
+        <figcaption>화면은 React SPA. 추론은 Modal GPU에서 Qwen을 직접 서빙한다.</figcaption>
+      </figure>
+    </section>
+
+    <section id="gpu">
+      <h2>Modal GPU 서빙</h2>
+      <p>Qwen3.6-27B를 Modal GPU에 올리고 vLLM으로 돌렸다. 슬라이드, 퀴즈, 노트, 과제를 같이 뽑았다.</p>
+      <p class="times" aria-label="강의 생성 시간">
+        <span class="before"><span class="num">462s</span> 순차</span>
+        <span class="arrow" aria-hidden="true">→</span>
+        <span class="after"><span class="num">120s</span> 병렬</span>
+      </p>
+      <p>클라우드 API는 폴백이다. Modal이 실패하면 Gemini 3.5 Flash, 그다음 Sonnet 4.5.</p>
+    </section>
+
+    <section id="cases">
+      <h2>왜 이렇게 짰는지</h2>
+
+      <article>
+        <h3>한 장씩 뽑으면 462초가 걸렸다</h3>
+        <p>강의 하나를 슬라이드 단위로 순차 호출하면 대기 시간이 길었다. vLLM 배치 스케줄링과 산출물 병렬로 120초까지 줄였다.</p>
+      </article>
+
+      <article>
+        <h3>교재 PDF를 생성마다 모델에 넣으면 근거가 빠졌다</h3>
+        <p>Marker로 텍스트를 뽑고, 품질 게이트에 걸린 페이지만 MinerU로 다시 뽑았다. BGE-M3 dense와 sparse로 Qdrant에 넣은 뒤, 검색 문단을 강의 생성 컨텍스트에 넣었다.</p>
+      </article>
+
+      <article>
+        <h3>모델이 뼈대까지 정하면 형식이 강의마다 갈렸다</h3>
+        <p>프레임과 난이도는 템플릿이 고정한다. 모델은 <code>{{빈칸}}</code>만 채운다. 나온 HTML은 살균하고 iframe sandbox로 연다.</p>
+      </article>
+    </section>
+
+    <section id="flow">
+      <h2>강의 생성 흐름</h2>
+      <p>슬라이드, 퀴즈, 노트, 과제는 같이 만든다. 음성은 슬라이드 대본을 받은 뒤 voice cloning으로 뽑는다.</p>
+      <ol class="flow">
+        <li>컨텍스트</li>
+        <li>슬라이드</li>
+        <li>퀴즈</li>
+        <li>노트</li>
+        <li>과제</li>
+        <li>Qwen3-TTS voice cloning</li>
+        <li>음성파일</li>
+      </ol>
+      <p class="note">파이프라인 전체(OCR, 퀴즈, 시험, 음성)는 README에 있다.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p><a href="https://github.com/algocean1204/SW-ilgwa">레포 README</a> · <a href="https://algocean1204.github.io/SW-ilgwa/">박제 데모</a></p>
+  </footer>
+  <script src="./app.js"></script>
+</body>
+</html>
