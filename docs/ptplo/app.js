@@ -1,6 +1,5 @@
 (() => {
   const stage = document.getElementById("stage");
-  const btn = document.getElementById("export-pdf");
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   const fit = () => {
@@ -21,20 +20,6 @@
     stage.style.transform = "";
     stage.style.marginBottom = "";
   };
-
-  btn?.addEventListener("pointerdown", () => {
-    btn.style.opacity = "0.7";
-  });
-  btn?.addEventListener("pointerup", () => {
-    btn.style.opacity = "";
-  });
-  btn?.addEventListener("pointercancel", () => {
-    btn.style.opacity = "";
-  });
-  btn?.addEventListener("click", () => {
-    printFit();
-    window.print();
-  });
 
   window.addEventListener("beforeprint", printFit);
   window.addEventListener("afterprint", fit);

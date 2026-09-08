@@ -20,37 +20,10 @@ html, body {
 }
 
 a { color: var(--green); }
-a:focus-visible, button:focus-visible {
+a:focus-visible {
   outline: 2px solid var(--green);
   outline-offset: 2px;
 }
-
-button {
-  font: inherit;
-  color: #fff;
-  background: var(--green);
-  border: 0;
-  padding: 0.45rem 0.9rem;
-  min-height: 44px;
-  cursor: pointer;
-}
-button:active { opacity: 0.75; }
-
-.toolbar {
-  position: sticky;
-  top: 0;
-  z-index: 5;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  padding: 0.6rem 1rem;
-  background: #fff;
-  border-bottom: 1px solid var(--line);
-}
-.toolbar p { margin: 0; font-size: 0.9rem; }
-.toolbar-actions { display: flex; gap: 0.75rem; align-items: center; }
-.toolbar-actions a { min-height: 44px; display: inline-flex; align-items: center; }
 
 .stage {
   transform-origin: top center;
@@ -281,7 +254,6 @@ th { color: var(--muted); font-weight: 600; }
 }
 
 @media print {
-  .no-print { display: none !important; }
   body { background: #fff; }
   .stage { transform: none !important; width: auto !important; }
   .sheet {
