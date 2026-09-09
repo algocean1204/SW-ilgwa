@@ -142,6 +142,34 @@ ul, ol { margin: 0; padding-left: 1.1rem; }
   height: auto;
   border: 1px solid var(--line);
 }
+
+.awards {
+  display: flex;
+  flex-direction: column;
+  gap: 3mm;
+  margin: 0 0 4mm;
+}
+
+.award-slot {
+  width: 62mm;
+  height: 42mm;
+  margin: 0;
+  border: 1px solid var(--line);
+  background: #f3f3f3;
+  overflow: hidden;
+}
+
+.award-slot img {
+  width: 62mm;
+  height: 42mm;
+  object-fit: contain;
+  display: block;
+  border: 0;
+}
+
+.award-slot img[src=""] {
+  visibility: hidden;
+}
 .achieve { padding-left: 1.1rem; }
 .achieve > li { margin: 0 0 3.5mm; }
 .achieve strong { display: block; margin-bottom: 1mm; }
