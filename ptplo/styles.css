@@ -170,6 +170,42 @@ ul, ol { margin: 0; padding-left: 1.1rem; }
 .award-slot img[src=""] {
   visibility: hidden;
 }
+
+.shot-grid {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 3.5mm;
+  align-items: start;
+}
+
+.shot {
+  margin: 0;
+}
+
+.shot.hero {
+  grid-row: 1 / 3;
+}
+
+.shot img {
+  display: block;
+  width: 100%;
+  height: 52mm;
+  object-fit: cover;
+  object-position: top left;
+  border: 1px solid var(--line);
+  background: #f7f7f7;
+}
+
+.shot.hero img {
+  height: 118mm;
+}
+
+.shot figcaption {
+  margin-top: 1.5mm;
+  color: var(--muted);
+  font-size: 11px;
+}
 .achieve { padding-left: 1.1rem; }
 .achieve > li { margin: 0 0 3.5mm; }
 .achieve strong { display: block; margin-bottom: 1mm; }
