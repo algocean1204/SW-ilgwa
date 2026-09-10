@@ -26,9 +26,9 @@
 
 ## Modal GPU 서빙
 
-Qwen3.6-27B를 Modal GPU에 올리고 vLLM으로 직접 서빙한다. continuous batching과 슬라이드·퀴즈·노트·과제 병렬 호출로 대기 시간을 줄였다. 클라우드 API는 폴백용이다.
+Qwen3.6-27B를 Modal GPU B200에 올리고 vLLM으로 직접 서빙한다. vLLM이 슬라이드를 병렬 할당하고, 검증과 음성 합성까지 한 강의에 넣었다. 클라우드 API는 폴백용이다.
 
-- 실측 — 강의 생성 순차 462s → 병렬 120s
+- 실측 — 15슬라이드 강의 1개(검증·음성 포함) 순차 462s → 병렬 120s
 - 폴백 — Modal 실패 시 Gemini 3.5 Flash → Sonnet 4.5 순
 
 ## 사용 기술들과 선택 근거
@@ -36,7 +36,7 @@ Qwen3.6-27B를 Modal GPU에 올리고 vLLM으로 직접 서빙한다. continuous
 양산은 Modal GPU의 Qwen, 클라우드 API는 폴백용으로만 썼다.
 
 - LangGraph — OCR 품질게이트·강의 생성·출제 재시도 분기를 StateGraph로 묶음
-- Qwen3.6-27B — Modal GPU + vLLM 서빙. 배치 스케줄링과 병렬 처리로 속도 효율을 높임
+- Qwen3.6-27B — Modal GPU B200 + vLLM. 슬라이드 병렬 할당, 검증·음성 포함
 - 폴백 — Modal 실패 시 Gemini 3.5 Flash → Sonnet 4.5 순. API 키는 테스트·폴백용
 - OCR — PDF는 Marker로 추출, 품질 게이트 실패 페이지만 MinerU로 재추출한 뒤 청킹
 - Qdrant — OCR 청크를 BGE-M3 dense(1024) + sparse로 저장. 검색은 둘을 병렬로 돌린 뒤 합쳐, 그 문단을 강의 생성 컨텍스트로 주입
@@ -137,7 +137,7 @@ flowchart TD
 |---|---|
 | 초기 콜드 스타트 | ~12.4s |
 | 모델 사전 로드 시 | ~0.8s |
-| 강의 생성 | 순차 462s → 병렬 120s |
+| 15슬라이드 1강 (검증·음성 포함) | 순차 462s → 병렬 120s |
 
 ## 발표 자료
 

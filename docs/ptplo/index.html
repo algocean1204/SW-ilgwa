@@ -53,11 +53,11 @@
       <div class="pillars">
         <section>
           <h3>시간을 재고 줄입니다</h3>
-          <p>한 장씩 뽑던 강의를 배치·병렬로 바꿨습니다.</p>
+          <p>한 강의를 순차로 뽑던 것을 vLLM 병렬로 바꿨습니다.</p>
           <ul>
-            <li>강의 생성 462s → 120s</li>
+            <li>15슬라이드 강의 1개, 검증·음성 포함 462s → 120s</li>
+            <li>Modal GPU B200, Qwen3.6-27B, vLLM</li>
             <li>모델 사전 로드 12.4s → 0.8s</li>
-            <li>Qwen3.6-27B를 Modal GPU에서 vLLM으로 서빙</li>
           </ul>
         </section>
         <section>
@@ -120,7 +120,7 @@
               <strong>Modal GPU + vLLM으로 생성 시간 단축</strong>
               <ul>
                 <li>슬라이드·퀴즈·노트·과제를 같이 생성</li>
-                <li>실측 462s → 120s</li>
+                <li>B200, 15슬라이드 1강, 검증·음성 포함 462s → 120s</li>
               </ul>
             </li>
             <li>
@@ -218,62 +218,47 @@
         <span>기록</span>
       </header>
       <h2>강의 생성 시간</h2>
-      <p class="deck">한 장씩 순차 호출하면 강의 하나 만드는 데 462초가 걸렸습니다. 배치와 병렬로 바꿨습니다.</p>
+      <p class="deck">Modal GPU B200에서 15슬라이드 강의 1개를 만들 때, 검증과 음성 합성까지 넣었습니다.</p>
       <div class="two">
         <section class="card">
-          <p class="tag warn">문제 1</p>
-          <h3>순차 생성이 462초</h3>
+          <p class="tag warn">문제</p>
+          <h3>순차로 돌리면 462초</h3>
           <p class="k">문제 상황</p>
-          <p>슬라이드 한 장을 한 호출로 뽑고, 퀴즈·노트·과제·대본도 그 뒤에 이어서 돌렸습니다.</p>
+          <p>슬라이드를 한 줄로 뽑고, 검증과 TTS까지 같은 강의에 붙이면 462초가 걸렸습니다.</p>
           <p class="k">원인</p>
           <ul>
-            <li>산출물이 서로 기다림</li>
-            <li>GPU는 떠 있는데 요청이 한 줄로만 들어감</li>
+            <li>15장을 순차로 할당하면 GPU가 비는 구간이 생김</li>
+            <li>검증·음성 합성이 끝난 뒤에야 강의 1개가 완성됨</li>
           </ul>
           <p class="k">영향</p>
-          <p>강의 하나를 준비하는 동안 다음 챕터를 못 넣습니다.</p>
+          <p>다음 강의에 못 넘어갑니다.</p>
         </section>
         <section class="card">
-          <p class="tag warn">문제 2</p>
-          <h3>콜드 스타트 12.4초</h3>
-          <p class="k">문제 상황</p>
-          <p>모델을 그때그때 올리면 첫 토큰 전에 12.4초가 붙었습니다.</p>
-          <p class="k">원인</p>
+          <p class="tag ok">한 일</p>
+          <h3>vLLM으로 슬라이드를 병렬 할당</h3>
+          <p class="k">환경</p>
           <ul>
-            <li>가중치를 요청 시점에 로드</li>
-            <li>외부 토큰 API만 쓰면 장당 단가가 강의 양산에 안 맞음</li>
+            <li>Modal GPU B200, Qwen3.6-27B, vLLM</li>
+            <li>대상: 강의 1개, 15슬라이드</li>
+            <li>포함: 내용 검증, 음성 합성</li>
           </ul>
-          <p class="k">영향</p>
-          <p>첫 강의가 체감으로 멈춘 것처럼 보입니다.</p>
+          <p class="k">결과</p>
+          <p>같은 범위로 120초.</p>
         </section>
       </div>
       <section class="card wide">
-        <p class="tag ok">한 일</p>
-        <div class="why-grid">
-          <div>
-            <h3>왜 Modal + vLLM인가</h3>
-            <ul>
-              <li>Qwen3.6-27B를 GPU에 올려 두고 양산 호출을 받음</li>
-              <li>vLLM 배치 스케줄링으로 동시에 들어온 슬라이드·퀴즈 요청을 묶음</li>
-              <li>슬라이드 · 퀴즈 · 노트 · 과제는 같은 단계에서 병렬</li>
-              <li>대본은 슬라이드 요약을 받은 뒤 합성</li>
-            </ul>
-          </div>
-          <div>
-            <h3>개선 결과</h3>
-            <table>
-              <thead>
-                <tr><th>항목</th><th>이전</th><th>이후</th></tr>
-              </thead>
-              <tbody>
-                <tr><td>강의 생성</td><td>462s</td><td>120s</td></tr>
-                <tr><td>초기 콜드 스타트</td><td>12.4s</td><td>—</td></tr>
-                <tr><td>모델 사전 로드</td><td>—</td><td>0.8s</td></tr>
-              </tbody>
-            </table>
-            <p class="small">숫자는 프로젝트에서 재 둔 값입니다. 클라우드 API는 이 경로의 주 엔진이 아닙니다.</p>
-          </div>
-        </div>
+        <p class="tag ok">측정</p>
+        <table>
+          <thead>
+            <tr><th>항목</th><th>순차</th><th>vLLM 병렬</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>15슬라이드 1강 (검증·음성 포함)</td><td>462s</td><td>120s</td></tr>
+            <tr><td>초기 콜드 스타트</td><td>12.4s</td><td>—</td></tr>
+            <tr><td>모델 사전 로드</td><td>—</td><td>0.8s</td></tr>
+          </tbody>
+        </table>
+        <p class="small">클라우드 API는 이 경로의 주 엔진이 아닙니다. Modal이 실패할 때만 폴백합니다.</p>
       </section>
     </article>
 
@@ -526,8 +511,8 @@
           <tr><th>항목</th><th>값</th></tr>
         </thead>
         <tbody>
-          <tr><td>강의 생성 (순차)</td><td>462s</td></tr>
-          <tr><td>강의 생성 (병렬)</td><td>120s</td></tr>
+          <tr><td>15슬라이드 1강, 검증·음성 포함 (순차)</td><td>462s</td></tr>
+          <tr><td>같은 범위, vLLM 병렬 (B200)</td><td>120s</td></tr>
           <tr><td>초기 콜드 스타트</td><td>12.4s</td></tr>
           <tr><td>모델 사전 로드</td><td>0.8s</td></tr>
         </tbody>
