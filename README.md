@@ -38,7 +38,7 @@ Qwen3.6-27B를 Modal GPU B200에 올리고 vLLM으로 직접 서빙한다. vLLM�
 - LangGraph — OCR 품질게이트·강의 생성·출제 재시도 분기를 StateGraph로 묶음
 - Qwen3.6-27B — Modal GPU B200 + vLLM. 슬라이드 병렬 할당, 검증·음성 포함
 - 폴백 — Modal 실패 시 Gemini 3.5 Flash → Sonnet 4.5 순. API 키는 테스트·폴백용
-- OCR — PDF는 Marker로 추출, 품질 게이트 실패 페이지만 MinerU로 재추출한 뒤 청킹
+- OCR — Marker 1차, 품질 게이트 실패 페이지만 MinerU. 버린 경로: PaddleOCR ONNX CER(문자오류률) 48.8%, PaddleOCR-VL 페이지 CER(문자오류률) 75.9%
 - Qdrant — OCR 청크를 BGE-M3 dense(1024) + sparse로 저장. 검색은 둘을 병렬로 돌린 뒤 합쳐, 그 문단을 강의 생성 컨텍스트로 주입
 - Qwen3-TTS — 강의 대본을 voice cloning으로 합성
 - Qwen3-ASR — 음성 질문 인식

@@ -210,6 +210,7 @@
       <header class="sheet-nav">
         <span>소개</span>
         <span>개요</span>
+        <span>화면</span>
         <span class="on">속도</span>
         <span>교재</span>
         <span>형식</span>
@@ -275,54 +276,36 @@
         <span>기록</span>
       </header>
       <h2>교재 PDF → 검색 근거</h2>
-      <p class="deck">생성 때마다 PDF를 모델에 넣으면 느리고, 스캔·수식 페이지에서 근거가 빠집니다.</p>
+      <p class="deck">생성 때마다 PDF를 모델에 넣으면 느리고, 수식·표가 깨진 문단이 검색에 들어갑니다.</p>
       <div class="two">
         <section class="card">
-          <p class="tag warn">문제 1</p>
-          <h3>원본 PDF를 매 요청에 넣음</h3>
-          <p class="k">문제 상황</p>
-          <p>강의·시험 프롬프트에 책 전체를 실으면 토큰과 시간이 같이 늘어납니다.</p>
-          <p class="k">원인</p>
-          <p>관련 문단만 고르는 인덱스가 없습니다.</p>
+          <p class="tag warn">버린 경로</p>
+          <h3>PaddleOCR ONNX, 이어서 PaddleOCR-VL</h3>
+          <p class="k">문제</p>
+          <p>CPU ONNX는 CER(문자오류률) 48.8%. VL 단독은 페이지 CER(문자오류률) 75.9%라 배포 불가로 적혀 있습니다. 수식과 표가 깨집니다.</p>
         </section>
         <section class="card">
-          <p class="tag warn">문제 2</p>
-          <h3>한 OCR 엔진으로는 페이지 타입이 갈림</h3>
-          <p class="k">문제 상황</p>
-          <p>텍스트 레이어가 있는 페이지와 스캔 페이지가 한 파일에 섞입니다.</p>
-          <p class="k">원인</p>
-          <p>실패한 페이지를 그대로 임베딩하면 검색이 엉뚱한 문단을 가져옵니다.</p>
+          <p class="tag ok">최종</p>
+          <h3>모델과 파이프라인</h3>
+          <p class="k">모델</p>
+          <ul>
+            <li>추출: Marker, 실패 페이지만 MinerU</li>
+            <li>임베딩: BGE-M3 (dense 1024 + sparse)</li>
+            <li>저장·검색: Qdrant</li>
+          </ul>
+          <p class="k">파이프라인</p>
+          <ol class="steps">
+            <li>PDF</li>
+            <li>페이지 분류</li>
+            <li>Marker</li>
+            <li>품질 게이트</li>
+            <li>실패 → MinerU</li>
+            <li>청킹</li>
+            <li>BGE-M3</li>
+            <li>Qdrant</li>
+          </ol>
         </section>
       </div>
-      <section class="card wide">
-        <p class="tag ok">한 일</p>
-        <div class="why-grid">
-          <div>
-            <h3>왜 Marker / MinerU / Qdrant인가</h3>
-            <ul>
-              <li>페이지를 분류한 뒤 Marker로 추출</li>
-              <li>품질 게이트를 통과하지 못한 페이지만 MinerU로 다시 추출</li>
-              <li>후처리(머리말·표·수식) 후 섹션 단위로 자름</li>
-              <li>BGE-M3로 dense 1024차원과 sparse를 같이 만들어 Qdrant에 저장</li>
-              <li>검색은 둘을 병렬로 돌린 뒤 한 리스트로 합쳐 강의 컨텍스트에 넣음</li>
-            </ul>
-          </div>
-          <div>
-            <h3>흐름</h3>
-            <ol class="steps">
-              <li>PDF</li>
-              <li>페이지 분류</li>
-              <li>Marker 추출</li>
-              <li>품질 게이트</li>
-              <li>실패 시 MinerU</li>
-              <li>청킹</li>
-              <li>BGE-M3</li>
-              <li>Qdrant</li>
-            </ol>
-            <p class="small">강의 생성은 이 인덱스를 조회합니다. 시험·노트도 같은 문단을 근거로 씁니다.</p>
-          </div>
-        </div>
-      </section>
     </article>
 
     <article class="sheet" id="p-form">
