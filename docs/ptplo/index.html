@@ -53,7 +53,7 @@
       <div class="pillars">
         <section>
           <h3>시간을 재고 줄입니다</h3>
-          <p>한 강의를 순차로 뽑던 것을 vLLM 병렬로 바꿨습니다.</p>
+          <p>순차로 뽑던 한 강의를 vLLM에서 병렬로 바꿨습니다.</p>
           <ul>
             <li>15슬라이드 강의 1개, 검증·음성 포함 462s → 120s</li>
             <li>Modal GPU B200, Qwen3.6-27B, vLLM</li>
@@ -61,7 +61,7 @@
           </ul>
         </section>
         <section>
-          <h3>형식은 코드가 고정합니다</h3>
+          <h3>형식은 코드로 고정합니다</h3>
           <p>모델이 뼈대까지 정하면 강의마다 레이아웃이 갈립니다.</p>
           <ul>
             <li>템플릿이 프레임·난이도를 고정, 모델은 {{빈칸}}만</li>
@@ -161,7 +161,7 @@
           <h3 class="label">성장</h3>
           <ul class="plain">
             <li>양산은 GPU, 장애는 API 폴백으로 나눔</li>
-            <li>품질을 재생성 횟수가 아니라 게이트와 템플릿으로 제한</li>
+            <li>품질은 재생성 횟수가 아니라 게이트와 템플릿으로 제한</li>
             <li>음성은 대본 이후 Qwen3-TTS voice cloning</li>
           </ul>
         </div>
@@ -181,7 +181,7 @@
         <span>기록</span>
       </header>
       <h2>데모 화면</h2>
-      <p class="deck">박제 데모에서 찍었습니다. AI 생성은 꺼져 있고, 미리 채워 둔 과목을 연 상태입니다.</p>
+      <p class="deck">박제 데모에서 찍었습니다. AI 생성은 꺼져 있고 미리 채워 둔 과목을 연 상태입니다.</p>
       <div class="shot-grid">
         <figure class="shot hero">
           <img src="./shots/02-learning.png" alt="학습실 슬라이드와 음성바">
@@ -225,7 +225,7 @@
           <p class="tag warn">문제</p>
           <h3>순차로 돌리면 462초</h3>
           <p class="k">문제 상황</p>
-          <p>슬라이드를 한 줄로 뽑고, 검증과 TTS까지 같은 강의에 붙이면 462초가 걸렸습니다.</p>
+          <p>슬라이드를 한 줄로 뽑고 검증과 TTS까지 같은 강의에 붙이면 462초가 걸렸습니다.</p>
           <p class="k">원인</p>
           <ul>
             <li>15장을 순차로 할당하면 GPU가 비는 구간이 생김</li>
@@ -244,7 +244,7 @@
             <li>포함: 내용 검증, 음성 합성</li>
           </ul>
           <p class="k">결과</p>
-          <p>같은 범위로 120초.</p>
+          <p>같은 범위는 120초입니다.</p>
         </section>
       </div>
       <section class="card wide">
@@ -341,7 +341,7 @@
             <li>프레임과 난이도는 코드가 미리 고정</li>
             <li>모델은 <code>{{빈칸}}</code>만 채움</li>
             <li>나온 HTML은 서버에서 하이라이트하고 살균</li>
-            <li>화면은 iframe sandbox. 스크립트만 허용</li>
+            <li>화면은 iframe sandbox, 스크립트만 허용</li>
           </ul>
           <p class="k">예</p>
           <pre class="slot">{
@@ -353,7 +353,7 @@
       </div>
       <section class="card wide">
         <p class="tag ok">시험 쪽</p>
-        <p>출제도 같은 방식입니다. 유형을 계획한 뒤 문항을 만들고, 교차 검증에서 걸리면 교정합니다. 교정이 안 되면 해당 문항만 다시 뽑습니다.</p>
+        <p>출제도 같은 방식입니다. 유형을 계획한 뒤 문항을 만들고 교차 검증에서 걸리면 교정합니다. 교정이 안 되면 해당 문항만 다시 뽑습니다.</p>
         <ol class="steps">
           <li>자료 분석</li>
           <li>출제 계획</li>
@@ -393,7 +393,7 @@
             <li>실패 시 Gemini 3.5 Flash → Sonnet 4.5</li>
             <li>API 키는 테스트와 이 폴백에만 사용</li>
           </ul>
-          <p class="small">폴백은 양산을 대체하려고 둔 것이 아닙니다. GPU가 죽었을 때 빈 화면을 안 주려고 둔 줄입니다.</p>
+          <p class="small">폴백은 양산을 대체하려고 둔 것이 아닙니다. GPU가 죽었을 때 빈 화면을 안 주려고 두었습니다.</p>
         </section>
         <section class="card">
           <p class="tag ok">음성</p>
@@ -436,7 +436,7 @@
         <span>기록</span>
       </header>
       <h2>파이프라인</h2>
-      <p class="deck">LangGraph로 분기만 그래프에 올렸습니다. 아래는 큰 노드입니다.</p>
+      <p class="deck">LangGraph에는 분기만 올렸습니다. 아래는 큰 노드입니다.</p>
       <h3 class="label">강의</h3>
       <ol class="steps big">
         <li>컨텍스트<br /><span>Qdrant 문단</span></li>
@@ -447,7 +447,7 @@
         <li>TTS<br /><span>voice cloning</span></li>
         <li>음성파일</li>
       </ol>
-      <p class="small">슬라이드·퀴즈·노트·과제는 같이 만들고, 음성만 슬라이드 대본 이후입니다.</p>
+      <p class="small">슬라이드·퀴즈·노트·과제는 같이 만들고 음성만 슬라이드 대본 뒤에 만듭니다.</p>
       <h3 class="label">OCR</h3>
       <ol class="steps">
         <li>PDF</li>
