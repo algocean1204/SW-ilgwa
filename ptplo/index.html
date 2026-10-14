@@ -38,7 +38,7 @@
             <li>AI 시스템 아키텍처 설계 및 FastAPI 비동기 추론 서버 구축</li>
             <li>LangGraph 기반 기능별 멀티 에이전트 파이프라인(강의·시험·OCR·TTS) 구현</li>
             <li>Modal B200 + vLLM 컨텍스트 분할 병렬 추론으로 1강 생성 시간 76.8% 단축</li>
-            <li>템플릿 빈칸 채우기 전략과 백엔드 정적 후처리·iframe 샌드박스 격리 구현</li>
+            <li>JSON 스키마 <code>{{빈칸}}</code> 템플릿 구조 고정 및 사실·논리 검증 루프 구현</li>
           </ul>
           <p class="contact">GitHub <a href="https://github.com/algocean1204/SW-ilgwa">github.com/algocean1204/SW-ilgwa</a></p>
           <p class="contact">서비스 데모 <a href="https://algocean1204.github.io/SW-ilgwa/">algocean1204.github.io/SW-ilgwa</a></p>
@@ -52,7 +52,7 @@
           <p>AI 시스템 아키텍처 설계 · FastAPI 백엔드 개발 · LangGraph 파이프라인 및 GPU 서빙 최적화</p>
         </div>
       </div>
-      <p class="intro-lead">생성 지연 시간과 모델 호출 단가를 측정 데이터 기반으로 통제하고, 출력 형식과 보안을 코드로 강제하는 AI 파이프라인을 구축했습니다.</p>
+      <p class="intro-lead">생성 지연 시간과 모델 호출 단가를 측정 데이터 기반으로 통제하고, 출력 형식과 정확도를 코드로 검증하는 AI 파이프라인을 구축했습니다.</p>
       <div class="pillars">
         <section>
           <h3>생성 시간 76.8% 단축 &amp; $0.38 과금</h3>
@@ -64,11 +64,11 @@
           </ul>
         </section>
         <section>
-          <h3>템플릿 구조 고정과 샌드박스 격리</h3>
+          <h3>템플릿 구조 고정과 교차 검증</h3>
           <p>구조는 코드가 결정하고 AI는 <code>{{빈칸}}</code>만 채우도록 제한했습니다.</p>
           <ul>
             <li>파인튜닝 비용($0) 없이 강의 16종·문제 20종 품질 일관성 확보</li>
-            <li>백엔드 Shiki 하이라이팅 + nh3 살균 + iframe sandbox 격리</li>
+            <li>생성 직후 사실·논리 교정 루프 및 모의고사 최대 3회 자가교정</li>
             <li>Marker·MinerU 품질 게이트와 후처리로 CER 0.222 달성</li>
           </ul>
         </section>
@@ -113,7 +113,7 @@
           <ul class="plain">
             <li>교재 수식·표가 깨지지 않는 검색 문맥(RAG) 구성</li>
             <li>GPU 병렬 처리량 확보로 1강 생성 시간 및 단가 절감</li>
-            <li>슬라이드 레이아웃 일관성 유지 및 XSS 실행 차단</li>
+            <li>JSON 템플릿 기반 슬라이드·문항 출력 일관성 유지</li>
             <li>모의고사 문항 품질 검증 및 GPU 장애 시 우회 경로 확보</li>
           </ul>
         </div>
@@ -135,10 +135,10 @@
               </ul>
             </li>
             <li>
-              <strong><code>{{빈칸}}</code> 템플릿 16종·20종 고정 및 격리 렌더링</strong>
+              <strong><code>{{빈칸}}</code> 템플릿 16종·20종 고정 및 내용 검증 루프</strong>
               <ul>
-                <li>SlideDesignSystem 16종 CSS 락 적용, 인라인 스타일·외부 CSS 차단</li>
-                <li>FastAPI Shiki·nh3 정적 후처리 후 <code>iframe sandbox</code> 렌더링</li>
+                <li>JSON 스키마와 시각 타입을 코드로 고정해 출력 구조 편차 제거</li>
+                <li>생성 후 사실·논리 1회 교정 및 인덱스 파손 시 원본 복구</li>
               </ul>
             </li>
             <li>
@@ -261,7 +261,7 @@
             <tr><td><strong>Qwen3.6-27B Dense FP8</strong></td><td><strong>48.2 (+68% 우위)</strong></td><td><strong>77.2%</strong></td><td><strong>86.2</strong></td><td><strong>94.1</strong></td><td><strong>27B 전 파라미터 상시 활성, FP8 양자화 안정성, 일관된 지연 시간</strong></td></tr>
           </tbody>
         </table>
-        <p class="small">HTML/CSS 디자인 규칙과 코드 생성 정확도를 평가하는 SkillsBench에서 MoE 모델 대비 +68%(48.2 vs 28.7) 높은 점수를 확인하고 메인 양산 엔진으로 채택했습니다.</p>
+        <p class="small">구조화된 교육 자료와 코드 생성 정확도를 평가하는 SkillsBench에서 MoE 모델 대비 +68%(48.2 vs 28.7) 높은 점수를 확인하고 메인 양산 엔진으로 채택했습니다.</p>
       </section>
     </article>
 
@@ -320,7 +320,7 @@
       </section>
     </article>
 
-    <!-- 7. 슬라이드 형식 및 격리 -->
+    <!-- 7. 슬라이드 형식 및 내용 검증 -->
     <article class="sheet" id="p-form">
       <header class="sheet-nav">
         <span>소개</span>
@@ -333,25 +333,25 @@
         <span>흐름</span>
         <span>기록</span>
       </header>
-      <h2><code>{{빈칸}}</code> 템플릿 전략 · 격리 렌더링 · 모의고사 교차검증</h2>
+      <h2><code>{{빈칸}}</code> 템플릿 전략 · 내용 검증 · 모의고사 교차검증</h2>
       <p class="deck">구조는 코드가 결정하고 AI는 <code>{{빈칸}}</code> 데이터만 채우도록 설계해, 파인튜닝 비용($0) 없이 강의 16종·문제 20종의 품질을 고정했습니다.</p>
       <div class="two">
         <section class="card">
           <p class="tag warn">문제</p>
-          <h3>자유 생성 시 레이아웃 편차 및 XSS 위험</h3>
+          <h3>자유 생성 시 출력 구조 편차 및 사실 오류</h3>
           <p class="k">문제 상황</p>
-          <p>모델에게 슬라이드 HTML/CSS 전체를 생성하게 하면 요청마다 폰트 크기, 여백, 코드 블록 구조가 달라지고 비인가 스크립트가 섞일 위험이 있었습니다.</p>
+          <p>모델에게 슬라이드와 문항 구조 전체를 자유롭게 생성하게 하면 요청마다 구성과 난이도가 달라지고, 설명이나 코드 결과에 오류가 섞였습니다.</p>
           <p class="k">해결 원칙</p>
-          <p>프레임·시각 틀(9종)·난이도는 코드가 사전 고정하고, 모델 출력은 백엔드에서 정적 검증·살균한 뒤 격리된 프레임 안에서만 렌더링합니다.</p>
+          <p>프레임·시각 타입·난이도는 코드가 Plan-First로 고정하고, 생성된 JSON은 사실·논리 검증 노드를 거쳐 오류가 지적된 필드만 선별 교정합니다.</p>
         </section>
         <section class="card">
           <p class="tag ok">해결</p>
-          <h3>SlideDesignSystem 16종 락 &amp; Shiki·nh3·iframe 격리</h3>
+          <h3>JSON 스키마 <code>{{빈칸}}</code> 고정 &amp; 내용 검증 루프</h3>
           <p class="k">구현 상세</p>
           <ul>
-            <li>16개 디자인 카테고리(46종 레이아웃) CSS 고정, 인라인 <code>style=""</code>·외부 CSS 차단</li>
-            <li>FastAPI에서 Shiki 코드 하이라이팅, KaTeX·Mermaid 변환 후 <code>nh3</code>로 XSS 태그 살균</li>
-            <li>프론트엔드는 <code>iframe sandbox="allow-scripts"</code>(<code>srcdoc</code>)로 부모 DOM·쿠키 접근 차단</li>
+            <li>강의 16종 카테고리와 9종 시각 타입의 JSON 스키마를 코드로 고정</li>
+            <li>생성 직후 사실·논리 1회 검증 → 지적 필드 1회 교정 → 1회 재검증 수행</li>
+            <li>교정 실패나 슬라이드 인덱스 훼손 시 원본 데이터로 복구해 중단 방지</li>
           </ul>
           <p class="k">슬라이드 템플릿 스키마 예시</p>
           <pre class="slot">{
@@ -476,7 +476,7 @@
       <div class="mini-three">
         <div>
           <p><b>슬라이드 &amp; 내용 검증</b></p>
-          <p>Opus 4.6 기획 슬롯 기반 Qwen3.6-27B vLLM 병렬 생성 → 내용 검증·교정 → Shiki·nh3 후처리 및 <code>iframe sandbox</code> 격리</p>
+          <p>Opus 4.6 기획 슬롯 기반 Qwen3.6-27B vLLM 병렬 생성 → JSON 스키마 검증 → 사실·논리 1회 교정 및 원본 복구 안전망</p>
         </div>
         <div>
           <p><b>퀴즈 · 모의고사 · 과제 채점</b></p>
@@ -522,7 +522,7 @@
           <ul>
             <li>Spring 코어와 FastAPI 추론 서버 분리 및 비동기 Job/콜백 구조 설계</li>
             <li>SkillsBench +68% 우위를 검증한 Qwen3.6-27B Dense FP8 선정 및 vLLM 병렬 서빙</li>
-            <li>파인튜닝 없이 품질을 고정하는 <code>{{빈칸}}</code> 템플릿(강의 16종·시험 20종)과 <code>iframe sandbox</code> 격리</li>
+            <li>파인튜닝 없이 출력 품질을 고정하는 <code>{{빈칸}}</code> 템플릿(강의 16종·시험 20종)과 교차 검증 루프</li>
             <li>Marker·MinerU 품질 게이트, BGE-M3 Dense+Sparse 하이브리드 RAG 구축</li>
             <li>TTS <code>float32</code> 클리핑 정규화, 대본 중복 제거 및 다단계 폴백 체인 구현</li>
           </ul>
