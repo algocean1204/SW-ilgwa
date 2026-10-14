@@ -13,9 +13,9 @@
     <!-- 1. 표지 -->
     <article class="sheet cover" id="p-cover">
       <p class="cover-kicker">PORTFOLIO</p>
-      <h1>AI 시스템 아키텍처와<br />FastAPI 파이프라인을 구축한<br />일과 · ilgwa</h1>
-      <p class="cover-sub">교재 PDF 기반 개인 맞춤형 AI 강의·수업 생성 플랫폼</p>
-      <p class="cover-meta">Python backend server · AI 파이프라인(LangGraph) 구축 담당 · 2026.04 ~ 2026.06 · 개발 11주 · 팀: 2명 · 기술: LangGraph, RAG, vLLM, OCR, TTS, FastAPI</p>
+      <h1>AI 시스템 아키텍처와<br />FastAPI 파이프라인을 설계·구현한<br />일과 · ilgwa</h1>
+      <p class="cover-sub">교재 PDF·주제 기반 맞춤형 AI 강의·음성 수업·모의고사 자동 생성 플랫폼</p>
+      <p class="cover-meta">김태규 (owen.kim) · AI 아키텍처 설계 &amp; FastAPI 백엔드 담당 · 2026.04 ~ 2026.06 (11주, 2인 팀 · 기여 50%)<br />LangGraph · vLLM · Modal B200 GPU · Qwen3.6-27B · Qdrant · BGE-M3 · Qwen3-TTS · FastAPI</p>
     </article>
 
     <!-- 2. 소개 -->
@@ -35,50 +35,50 @@
         <div>
           <h2>일과 · ilgwa</h2>
           <ul class="plain">
-            <li>AI 시스템 아키텍처 설계 · FastAPI 백엔드 개발</li>
-            <li>LangGraph를 사용한 기능별 AI 에이전트 파이프라인 개발</li>
-            <li>vLLM 기반 대규모 동시 병렬 처리로 1강 생성 지연 대폭 단축</li>
-            <li>품질 게이트 기반 하이브리드 RAG 및 안전한 iframe sandbox 격리</li>
+            <li>AI 시스템 아키텍처 설계 및 FastAPI 비동기 추론 서버 구축</li>
+            <li>LangGraph 기반 기능별 멀티 에이전트 파이프라인(강의·시험·OCR·TTS) 구현</li>
+            <li>Modal B200 + vLLM 컨텍스트 분할 병렬 추론으로 1강 생성 시간 76.8% 단축</li>
+            <li>템플릿 빈칸 채우기 전략과 백엔드 정적 후처리·iframe 샌드박스 격리 구현</li>
           </ul>
-          <p class="contact">GitHub <a href="https://github.com/algocean1204/SW-ilgwa">algocean1204/SW-ilgwa</a></p>
+          <p class="contact">GitHub <a href="https://github.com/algocean1204/SW-ilgwa">github.com/algocean1204/SW-ilgwa</a></p>
           <p class="contact">서비스 데모 <a href="https://algocean1204.github.io/SW-ilgwa/">algocean1204.github.io/SW-ilgwa</a></p>
         </div>
         <div class="intro-side">
           <h3 class="label">SKILL</h3>
           <p><b>AI 파이프라인</b> LangGraph, RAG, vLLM, FastAPI</p>
-          <p><b>모델 서빙</b> Modal GPU B200, Qwen3.6-27B Dense FP8, Qwen3-TTS, OCR</p>
-          <p><b>기획·폴백·검색</b> Claude Opus 4.6, Claude Sonnet, Qdrant</p>
+          <p><b>자체 서빙·음성</b> Modal B200, Qwen3.6-27B FP8, Qwen3-TTS, Whisper Turbo</p>
+          <p><b>기획·검색·검증</b> Claude Opus 4.6 / Sonnet 4.6, Qdrant, BGE-M3, Marker·MinerU</p>
           <h3 class="label">ROLE</h3>
-          <p>AI 시스템 아키텍처 설계 · FastAPI 백엔드 개발 · LangGraph 기능별 AI 에이전트 파이프라인 개발</p>
+          <p>AI 시스템 아키텍처 설계 · FastAPI 백엔드 개발 · LangGraph 파이프라인 및 GPU 서빙 최적화</p>
         </div>
       </div>
-      <p class="intro-lead">지연 시간과 모델 호출 비용을 엔지니어링으로 통제하고, 프로덕션 수준의 안정적인 AI 파이프라인을 구축했습니다.</p>
+      <p class="intro-lead">생성 지연 시간과 모델 호출 단가를 측정 데이터 기반으로 통제하고, 출력 형식과 보안을 코드로 강제하는 AI 파이프라인을 구축했습니다.</p>
       <div class="pillars">
         <section>
-          <h3>생성 지연 76.8% 단축</h3>
-          <p>순차 생성을 vLLM 기반 동시 병렬 할당으로 전환했습니다.</p>
+          <h3>생성 시간 76.8% 단축 &amp; $0.38 과금</h3>
+          <p>순차 생성을 컨텍스트 분할 기반 vLLM 병렬 추론으로 전환했습니다.</p>
           <ul>
-            <li>15슬라이드 1강 (검증·음성 포함): 518s → 120s (76.8% 단축)</li>
-            <li>Modal B200 GPU, Qwen3.6-27B Dense FP8</li>
-            <li>메모리 사전 로드로 기동 지연 12.4s → 0.8s (15.5배 가속)</li>
+            <li>15슬라이드 1강 생성: 518s → 120s (검증·음성 통합 기준 462s → 120s)</li>
+            <li>가중치 사전 로드로 콜드스타트 12.4s → 0.8s (15.5배 단축)</li>
+            <li>GPU 사용 시간 과금으로 1강 생성 $0.38, 미사용 시 유지비 $0 달성</li>
           </ul>
         </section>
         <section>
-          <h3>코드 기반 디자인 통제와 격리</h3>
-          <p>모델의 자율 생성으로 인한 레이아웃 CSS 붕괴를 코드로 차단했습니다.</p>
+          <h3>템플릿 구조 고정과 샌드박스 격리</h3>
+          <p>구조는 코드가 결정하고 AI는 <code>{{빈칸}}</code>만 채우도록 제한했습니다.</p>
           <ul>
-            <li>SlideDesignSystem 16종 카테고리 CSS 락 설계</li>
-            <li>백엔드 Shiki 문법 하이라이팅 + iframe sandbox 격리</li>
-            <li>OCR 품질 게이트로 수식·표 깨짐 방지 (CER 98.6% 개선)</li>
+            <li>파인튜닝 비용($0) 없이 강의 16종·문제 20종 품질 일관성 확보</li>
+            <li>백엔드 Shiki 하이라이팅 + nh3 살균 + iframe sandbox 격리</li>
+            <li>Marker·MinerU 품질 게이트와 후처리로 CER 0.222 달성</li>
           </ul>
         </section>
         <section>
-          <h3>책임 분리와 고가용성 설계</h3>
-          <p>트랜잭션 코어와 수명주기가 다른 고부하 AI 파이프라인을 분리했습니다.</p>
+          <h3>MSA 책임 분리와 계층형 라우팅</h3>
+          <p>트랜잭션 코어 서버와 고부하 AI 추론 런타임을 분리했습니다.</p>
           <ul>
-            <li>Spring(인증·결제) ↔ FastAPI(추론·RAG·TTS) 분리</li>
-            <li>상용 모델 단독 호출 대비 약 76%~79% 비용 절감 (마진 27% 확보)</li>
-            <li>기획 Opus 4.6 · 생성 Qwen3.6-27B · 폴백 Sonnet 계층 배치</li>
+            <li>Spring(인증·결제·트랜잭션) ↔ FastAPI(추론·RAG·TTS) 분리</li>
+            <li>기획 Opus 4.6 · 양산 Qwen3.6-27B · 채점/Q&amp;A Sonnet 4.6 배치</li>
+            <li>상용 API 단독 호출 대비 비용 76~79% 절감 (운영 마진 ~27%)</li>
           </ul>
         </section>
       </div>
@@ -100,53 +100,52 @@
       <div class="tri">
         <div>
           <h2 class="title-bar">일과 · ilgwa</h2>
-          <p class="subtitle">교재 PDF 입력 → 강의 · 슬라이드 · 음성 · 시험 · 노트</p>
+          <p class="subtitle">교재 PDF·주제 입력 → 강의 · 슬라이드 · 음성 · 시험 · 노트</p>
           <h3 class="label">개요</h3>
           <ul class="plain">
             <li>기간: 2026.04 ~ 2026.06 (개발 11주)</li>
-            <li>인원: 2명 (내 역할: AI 시스템 아키텍처 설계 · FastAPI 백엔드 개발 · LangGraph 기능별 AI 에이전트 파이프라인 개발)</li>
-            <li>팀원: Spring 코어 서버, 인프라 배포</li>
-            <li>기술: LangGraph, RAG, vLLM, OCR, TTS, FastAPI</li>
+            <li>인원: 2명 (기여도 50% : 50%)</li>
+            <li>내 역할: AI 시스템 아키텍처 설계, FastAPI 서버, LangGraph 에이전트 파이프라인</li>
+            <li>팀원(김나경): Spring Boot 코어 서버, AWS·Terraform 배포 자동화</li>
             <li>데모: algocean1204.github.io/SW-ilgwa/</li>
           </ul>
           <h3 class="label">엔지니어링 목표</h3>
           <ul class="plain">
-            <li>교재 수식·표 왜곡 없는 무결성 RAG 문맥 주입</li>
-            <li>GPU 처리량 극대화로 강의 일괄 생성 지연 단축</li>
-            <li>LLM 환각 스타일링 차단 및 안전한 iframe sandbox 격리</li>
-            <li>단일 GPU 장애 시에도 서비스 무중단을 보장하는 대체 회로 확보</li>
+            <li>교재 수식·표가 깨지지 않는 검색 문맥(RAG) 구성</li>
+            <li>GPU 병렬 처리량 확보로 1강 생성 시간 및 단가 절감</li>
+            <li>슬라이드 레이아웃 일관성 유지 및 XSS 실행 차단</li>
+            <li>모의고사 문항 품질 검증 및 GPU 장애 시 우회 경로 확보</li>
           </ul>
         </div>
         <div>
-          <h3 class="label">핵심 성과</h3>
+          <h3 class="label">핵심 구현 성과</h3>
           <ol class="achieve">
             <li>
-              <strong>vLLM 기반 슬라이드 동시 병렬 생성</strong>
+              <strong>Plan-First &amp; vLLM 병렬 추론으로 120초·$0.38 달성</strong>
               <ul>
-                <li>슬라이드 15장 병렬 할당, 퀴즈·노트·과제 동시 생성</li>
-                <li>15슬라이드 1강 (검증·음성 포함) 518s → 120s (76.8% 단축)</li>
-                <li>모델 사전 로드로 콜드스타트 12.4s → 0.8s (15.5배 단축)</li>
+                <li>Opus 4.6 1회 기획 후 슬라이드 15장·퀴즈·노트·과제 동시 생성</li>
+                <li>1강 생성 518s → 120s (76.8% 단축), 콜드스타트 12.4s → 0.8s</li>
               </ul>
             </li>
             <li>
-              <strong>품질 게이트 기반 하이브리드 OCR 파이프라인</strong>
+              <strong>품질 게이트 기반 하이브리드 OCR &amp; Qdrant RAG</strong>
               <ul>
-                <li>Marker 1차 파싱 + 신뢰도 게이트 실패 페이지만 MinerU 재추출</li>
-                <li>문자오류율(CER) 48.8%·75.9% → 0.222 달성 (98.6% 개선)</li>
+                <li>Marker 1차 추출 + 게이트 실패 페이지만 MinerU 재추출</li>
+                <li>Kanana 후처리 CER 0.222 (98.6% 감소), BGE-M3 Dense+Sparse 검색</li>
               </ul>
             </li>
             <li>
-              <strong>Qdrant Dense + Sparse 하이브리드 검색 주입</strong>
+              <strong><code>{{빈칸}}</code> 템플릿 16종·20종 고정 및 격리 렌더링</strong>
               <ul>
-                <li>BGE-M3 Dense(1024) + Lexical Sparse 앙상블 검색</li>
-                <li>전공 키워드와 의미 문맥을 동시 포착해 환각 방지</li>
+                <li>SlideDesignSystem 16종 CSS 락 적용, 인라인 스타일·외부 CSS 차단</li>
+                <li>FastAPI Shiki·nh3 정적 후처리 후 <code>iframe sandbox</code> 렌더링</li>
               </ul>
             </li>
             <li>
-              <strong>SlideDesignSystem 16종 락 & 백엔드 격리 렌더링</strong>
+              <strong>4에이전트 ×4 병렬 모의고사 출제 및 교차검증 루프</strong>
               <ul>
-                <li>16종 CSS 디자인 시스템 강제, 인라인 style="" 원천 차단</li>
-                <li>백엔드 Shiki 토큰화 + iframe sandbox="allow-scripts" 격리</li>
+                <li>20종 문제 유형 대상 4병렬 생성 및 정답 위치 균등 사전 배정</li>
+                <li>교차 검증 실패 문항만 최대 3회 자가교정(불가 시 선별 재생성)</li>
               </ul>
             </li>
           </ol>
@@ -161,11 +160,12 @@
               <img src="" alt="수상 2" width="234" height="156">
             </figure>
           </div>
-          <h3 class="label">엔지니어링 성장</h3>
+          <h3 class="label">운영 및 품질 지표</h3>
           <ul class="plain">
-            <li>상용 API 전량 의존 대비 약 76%~79% 비용 절감 (마진 27% 확보)</li>
-            <li>TTS 오디오 float32 정규화로 음성 깨짐 원천 차단 및 화자 유사도 0.964~0.976 유지</li>
-            <li>Opus(기획) · Qwen(양산) · Sonnet(폴백) 3단계 연결로 서비스 무중단 보장</li>
+            <li>토큰 과금 대신 GPU 사용 시간 과금으로 1강 $0.38·유휴 유지비 $0 구현</li>
+            <li>상용 모델 단독 호출 대비 연산 비용 76~79% 절감 (마진 ~27% 확보)</li>
+            <li>TTS 오디오 <code>float32</code> 클리핑 정규화로 잡음 제거 및 유사도 0.964~0.976 달성</li>
+            <li>Modal 장애 시 Gemini · Claude · OpenAI 다단계 폴백 체인 연결</li>
           </ul>
         </div>
       </div>
@@ -184,28 +184,28 @@
         <span>흐름</span>
         <span>기록</span>
       </header>
-      <h2>데모 화면 (코어 기능 렌더링)</h2>
-      <p class="deck">사전 생성된 3과목(Python, Rust, OS)의 5대 산출물(슬라이드·음성·모의고사·노트·과제)과 학습 대시보드 화면입니다.</p>
+      <h2>데모 화면 (5대 학습 산출물)</h2>
+      <p class="deck">정적 데모에 탑재된 3개 과목(Python, Rust, 운영체제)의 실제 생성 산출물(슬라이드·음성·모의고사·암기노트·과제) 화면입니다.</p>
       <div class="shot-grid">
         <figure class="shot hero">
           <img src="./shots/02-learning.png" alt="학습실 슬라이드와 음성바">
-          <figcaption>학습실 · Qwen3.6-27B 인터랙티브 슬라이드 & Qwen3-TTS 음성 플레이어</figcaption>
+          <figcaption>학습실 · Qwen3.6-27B 인터랙티브 슬라이드 &amp; Qwen3-TTS 음성 수업 플레이어</figcaption>
         </figure>
         <figure class="shot">
           <img src="./shots/01-home.png" alt="홈 대시보드">
-          <figcaption>홈 대시보드 · 개인 맞춤 진도 관리</figcaption>
+          <figcaption>홈 대시보드 · 커리큘럼 진도 및 취약 단원 관리</figcaption>
         </figure>
         <figure class="shot">
           <img src="./shots/05-exam.png" alt="실전 모의고사">
-          <figcaption>실전 모의고사 · 20종 템플릿 기반 평가 문항</figcaption>
+          <figcaption>실전 모의고사 · 20종 유형 ×4 병렬 출제 및 AI 약점 리포트</figcaption>
         </figure>
         <figure class="shot">
           <img src="./shots/03-notes.png" alt="암기노트">
-          <figcaption>암기노트 · 핵심 개념 요약</figcaption>
+          <figcaption>핵심 암기노트 · 개념 요약 및 비교 정리</figcaption>
         </figure>
         <figure class="shot">
           <img src="./shots/04-homework.png" alt="과제">
-          <figcaption>실습 과제 · 코드 작성 및 평가 가이드</figcaption>
+          <figcaption>실습 과제 · 코드 작성 과제 및 비동기 AI 채점</figcaption>
         </figure>
       </div>
     </article>
@@ -223,52 +223,45 @@
         <span>흐름</span>
         <span>기록</span>
       </header>
-      <h2>강의 일괄 생성 시간 단축 & 모델 선정</h2>
-      <p class="deck">Modal B200 GPU 환경에서 15슬라이드 1강(검증 및 음성 합성 포함) 생성 시간을 76.8% 단축했습니다.</p>
+      <h2>강의 생성 시간 단축 (76.8%) · $0.38 과금 구조 · 모델 선정</h2>
+      <p class="deck">Modal B200 GPU에서 컨텍스트 분할과 vLLM 병렬 추론을 적용해 1강 생성 시간을 120초로 줄이고 강의당 비용을 $0.38로 맞췄습니다.</p>
       <div class="two">
         <section class="card">
-          <p class="tag warn">문제 & 지연 원인</p>
-          <h3>순차 파이프라인 병목 (518초 지연)</h3>
+          <p class="tag warn">문제 &amp; 원인</p>
+          <h3>문맥 누적 순차 생성 시 518초 소요</h3>
           <p class="k">문제 상황</p>
-          <p>15장의 슬라이드, 퀴즈, 노트, 과제, TTS를 단일 흐름으로 순차 요청하여 1강당 518초(8.6분)가 소요되었습니다.</p>
-          <p class="k">원인</p>
+          <p>슬라이드 15장과 퀴즈·노트·과제·음성을 단일 흐름으로 순차 생성할 때 1강당 518초(검증·음성 통합 측정 시 462초)가 소요되었습니다.</p>
+          <p class="k">병목 원인</p>
           <ul>
-            <li>이전 슬라이드 문맥 누적으로 인한 직렬 대기 및 GPU 연산 유휴(Idle) 구간 발생</li>
-            <li>텍스트 생성이 모두 끝날 때까지 무거운 음성 합성 처리가 직렬로 대기</li>
+            <li>앞 슬라이드 전문을 다음 프롬프트에 누적 전달해 직렬 대기와 뒤쪽 슬라이드 형식 깨짐 발생</li>
+            <li>텍스트 생성이 끝날 때까지 음성 합성(TTS)이 직렬 대기하며 GPU 유휴 구간 발생</li>
           </ul>
-          <p class="k">영향</p>
-          <p>극심한 대기 시간으로 인한 사용자 이탈 및 서비스 연속성 저해.</p>
         </section>
         <section class="card">
-          <p class="tag ok">해결</p>
-          <h3>vLLM 동시 병렬 생성 및 Plan-First 분리</h3>
-          <p class="k">환경 & 모델 채택</p>
+          <p class="tag ok">해결 &amp; 경제성</p>
+          <h3>Plan-First 분리 · vLLM 병렬 추론 · GPU 시간 과금</h3>
+          <p class="k">아키텍처 조치</p>
           <ul>
-            <li>Modal B200 GPU, Qwen3.6-27B Dense FP8, vLLM</li>
-            <li>초당 단가($0.001736/초) 기반으로 120초 연산 시간 정밀 제어</li>
-          </ul>
-          <p class="k">아키텍처 개선</p>
-          <ul>
-            <li>Plan-First: Opus 4.6이 커리큘럼당 1회 전체 슬라이드 핵심 개요 선제 기획</li>
-            <li>1슬라이드 = 1컨텍스트 독립 분할 후 vLLM N-병렬 동시 생성</li>
-            <li>퀴즈·노트·과제 동시 생성, 음성은 대본 생성 즉시 비동기 큐 위임</li>
+            <li><b>Plan-First</b>: Claude Opus 4.6이 커리큘럼당 1회 호출로 15개 슬라이드 개요 슬롯을 선제 확정</li>
+            <li><b>컨텍스트 분할 병렬화</b>: 1슬라이드 = 1컨텍스트로 독립 분할해 vLLM에서 동시 생성 (퀴즈·노트·과제 병렬 실행)</li>
+            <li><b>자체 모델 상주</b>: Modal 스토리지 사전 로드로 콜드스타트 12.4s → 0.8s 단축 (API 오버헤드 &lt; 0.1s)</li>
           </ul>
           <p class="k">결과</p>
-          <p>동일 생성 범위 기준 518s → 120s로 76.8% 단축 (4.3배 가속).</p>
+          <p>생성 시간 <b>518s → 120s (76.8% 단축)</b>. 토큰 과금이 아닌 GPU 사용 시간(초당 $0.001736) 과금으로 <b>1강 $0.38, 미사용 유지비 $0</b> 달성.</p>
         </section>
       </div>
       <section class="card wide">
-        <p class="tag ok">모델 선정 이유 (왜 Qwen3.6-27B Dense FP8인가?)</p>
+        <p class="tag ok">양산 모델 벤치마크: 왜 Qwen3.6-27B Dense FP8인가?</p>
         <table>
           <thead>
-            <tr><th>모델</th><th>SkillsBench (코딩/교육자료)</th><th>SWE-bench</th><th>MMLU-Pro</th><th>구조적 특징 및 이점</th></tr>
+            <tr><th>모델</th><th>SkillsBench (코드·교육자료)</th><th>SWE-bench</th><th>MMLU-Pro</th><th>AIME</th><th>구조적 특징 및 선정 근거</th></tr>
           </thead>
           <tbody>
-            <tr><td>Qwen3.6-35B-A3B (MoE)</td><td>28.7</td><td>73.4%</td><td>—</td><td>3B 활성 파라미터, 라우팅 분기 지터 발생</td></tr>
-            <tr><td><strong>Qwen3.6-27B Dense FP8</strong></td><td><strong>48.2 (+68% 우위)</strong></td><td><strong>77.2%</strong></td><td><strong>86.2</strong></td><td><strong>일관된 응답 속도, FP8 양자화 안정성, 27B 전 파라미터 풀 추론력</strong></td></tr>
+            <tr><td>Qwen3.6-35B-A3B (MoE)</td><td>28.7</td><td>73.4%</td><td>—</td><td>92.7</td><td>3B 활성 파라미터, 라우팅 분기 지연 편차(Jitter) 발생</td></tr>
+            <tr><td><strong>Qwen3.6-27B Dense FP8</strong></td><td><strong>48.2 (+68% 우위)</strong></td><td><strong>77.2%</strong></td><td><strong>86.2</strong></td><td><strong>94.1</strong></td><td><strong>27B 전 파라미터 상시 활성, FP8 양자화 안정성, 일관된 지연 시간</strong></td></tr>
           </tbody>
         </table>
-        <p class="small">B200 GPU 환경에서 27B Dense 모델의 연산 속도 손실 없이 SkillsBench 48.2(+68%)의 압도적인 기술 교육 자료 및 코드 생성 품질을 확보했습니다.</p>
+        <p class="small">HTML/CSS 디자인 규칙과 코드 생성 정확도를 평가하는 SkillsBench에서 MoE 모델 대비 +68%(48.2 vs 28.7) 높은 점수를 확인하고 메인 양산 엔진으로 채택했습니다.</p>
       </section>
     </article>
 
@@ -285,42 +278,46 @@
         <span>흐름</span>
         <span>기록</span>
       </header>
-      <h2>교재 PDF RAG 파이프라인 및 OCR 무결성 확보</h2>
-      <p class="deck">전공 교재의 복잡한 수식과 다단 표 왜곡을 차단하고, 정확한 검색 문맥을 주입하는 하이브리드 파이프라인을 구축했습니다.</p>
+      <h2>교재 PDF 하이브리드 OCR 및 Qdrant RAG 파이프라인</h2>
+      <p class="deck">단일 OCR 엔진의 수식·표 깨짐 문제를 품질 게이트 기반 이중 추출과 후처리로 해결하고, Dense+Sparse 하이브리드 검색을 구성했습니다.</p>
       <div class="two">
         <section class="card">
           <p class="tag warn">벤치마크 및 폐기</p>
-          <h3>PaddleOCR ONNX 및 PaddleOCR-VL 실측</h3>
-          <p class="k">실측 결과 및 판정</p>
-          <p>CPU ONNX의 문자오류율(CER)은 48.8%, PaddleOCR-VL 단독은 페이지 CER 75.9%로 실측되어 배포 불가로 판정했습니다.</p>
-          <p class="k">문제 원인</p>
+          <h3>단일 OCR 경로의 수식·표 파손 실측</h3>
+          <p class="k">실측 수치 및 판정</p>
+          <p>초기 후보였던 CPU ONNX(PP-OCRv5)는 문자오류율(CER) 48.8%(빈 출력 8.3%), PaddleOCR-VL 단독 경로는 페이지 CER 75.9%(10.39초/페이지)로 측정되어 단독 배포 불가로 판정했습니다.</p>
+          <p class="k">원인 분석</p>
           <ul>
-            <li>다단 레이아웃 인식 실패로 문단 순서 뒤섞임 발생</li>
-            <li>LaTeX 수식 및 표 구조 파편화로 벡터 DB 검색 인덱스 오염</li>
+            <li>전공 서적의 다단 레이아웃에서 문단 읽기 순서가 뒤섞임</li>
+            <li>LaTeX 수식 기호와 표 경계가 깨진 채 청킹되어 벡터 검색 품질 저하</li>
           </ul>
         </section>
         <section class="card">
-          <p class="tag ok">아키텍처 확정</p>
-          <h3>품질 게이트 기반 하이브리드 RAG (CER 0.222 달성)</h3>
-          <p class="k">모델 구성</p>
+          <p class="tag ok">최종 아키텍처</p>
+          <h3>품질 게이트 이중 추출 + BGE-M3 하이브리드 검색</h3>
+          <p class="k">구성 요소</p>
           <ul>
-            <li>추출: Marker 1차 파싱, 게이트 실패 페이지만 MinerU 재추출</li>
-            <li>임베딩: BGE-M3 (Dense 1024차원 + Lexical Sparse)</li>
-            <li>인덱싱·검색: Qdrant 하이브리드 벡터 검색</li>
+            <li><b>1·2차 추출</b>: Marker로 고속 파싱 후 품질 게이트 실패 페이지만 MinerU로 재추출</li>
+            <li><b>교정 후처리</b>: Kanana-2(2.1B)로 맞춤법·LaTeX 수식 정규화 (후처리 CER 16.047 → <b>0.222, 98.6% 감소</b>)</li>
+            <li><b>임베딩·검색</b>: 600~1,200 토큰 청킹 후 BGE-M3(Dense 1024 + Lexical Sparse)로 Qdrant 인덱싱</li>
           </ul>
           <p class="k">파이프라인 흐름</p>
           <ol class="steps">
             <li>PDF</li>
             <li>페이지 분류</li>
-            <li>Marker 파싱</li>
+            <li>Marker</li>
             <li>품질 게이트</li>
             <li>실패 시 MinerU</li>
-            <li>청킹</li>
+            <li>Kanana 후처리</li>
             <li>BGE-M3</li>
             <li>Qdrant</li>
           </ol>
         </section>
       </div>
+      <section class="card wide">
+        <p class="tag ok">입력 경로 분리: 참고 도서 색인 vs 학생 과제 제출</p>
+        <p>500~1,000페이지 분량의 참고 도서는 텍스트 레이어(`pypdfium2`) 우선 추출 후 래스터화가 필요한 페이지만 하이브리드 OCR 파이프라인으로 색인하고, 학생이 제출하는 단일 과제 이미지·PDF는 별도 OCR 없이 멀티모달 모델(Sonnet VLM)이 직접 판독하도록 분리해 불필요한 GPU 호출을 제거했습니다.</p>
+      </section>
     </article>
 
     <!-- 7. 슬라이드 형식 및 격리 -->
@@ -336,48 +333,46 @@
         <span>흐름</span>
         <span>기록</span>
       </header>
-      <h2>슬라이드 생성 제어 및 백엔드 격리 렌더링</h2>
-      <p class="deck">LLM의 환각 스타일링으로 인한 레이아웃 붕괴를 코드로 통제하고, 브라우저 렌더링 환경을 완벽히 격리했습니다.</p>
+      <h2><code>{{빈칸}}</code> 템플릿 전략 · 격리 렌더링 · 모의고사 교차검증</h2>
+      <p class="deck">구조는 코드가 결정하고 AI는 <code>{{빈칸}}</code> 데이터만 채우도록 설계해, 파인튜닝 비용($0) 없이 강의 16종·문제 20종의 품질을 고정했습니다.</p>
       <div class="two">
         <section class="card">
           <p class="tag warn">문제</p>
-          <h3>자유 생성에 따른 디자인 파편화</h3>
+          <h3>자유 생성 시 레이아웃 편차 및 XSS 위험</h3>
           <p class="k">문제 상황</p>
-          <p>모델에게 슬라이드 HTML/CSS 생성을 전적으로 위임하자 요청마다 폰트, 여백, 코드 블록 레이아웃이 뒤바뀌었습니다.</p>
-          <p class="k">원인</p>
-          <p>토큰 생성 자율도로 인해 16종 디자인 템플릿의 CSS 규칙이 무시되고, 임의 인라인 스크립트 삽입 가능성이 발생했습니다.</p>
-          <p class="k">영향</p>
-          <p>제품의 일관된 UI 제공 불가 및 레이아웃 깨짐 현상 초래.</p>
+          <p>모델에게 슬라이드 HTML/CSS 전체를 생성하게 하면 요청마다 폰트 크기, 여백, 코드 블록 구조가 달라지고 비인가 스크립트가 섞일 위험이 있었습니다.</p>
+          <p class="k">해결 원칙</p>
+          <p>프레임·시각 틀(9종)·난이도는 코드가 사전 고정하고, 모델 출력은 백엔드에서 정적 검증·살균한 뒤 격리된 프레임 안에서만 렌더링합니다.</p>
         </section>
         <section class="card">
           <p class="tag ok">해결</p>
-          <h3>SlideDesignSystem 16종 락 & 백엔드 Shiki 후처리</h3>
-          <p class="k">아키텍처 결정</p>
+          <h3>SlideDesignSystem 16종 락 &amp; Shiki·nh3·iframe 격리</h3>
+          <p class="k">구현 상세</p>
           <ul>
-            <li>16개 카테고리 CSS 디자인 시스템을 코드로 고정, 인라인 style="" 금지</li>
-            <li>모델은 정해진 클래스 슬롯과 시맨틱 HTML만 출력하도록 제어</li>
-            <li>FastAPI 백엔드에서 Shiki 문법 하이라이팅 정적 처리 완료</li>
-            <li>프론트엔드는 iframe sandbox="allow-scripts"로 완전히 격리 렌더링</li>
+            <li>16개 디자인 카테고리(46종 레이아웃) CSS 고정, 인라인 <code>style=""</code>·외부 CSS 차단</li>
+            <li>FastAPI에서 Shiki 코드 하이라이팅, KaTeX·Mermaid 변환 후 <code>nh3</code>로 XSS 태그 살균</li>
+            <li>프론트엔드는 <code>iframe sandbox="allow-scripts"</code>(<code>srcdoc</code>)로 부모 DOM·쿠키 접근 차단</li>
           </ul>
-          <p class="k">JSON 스키마 제어 예시</p>
+          <p class="k">슬라이드 템플릿 스키마 예시</p>
           <pre class="slot">{
-  "category": "code",
+  "category": "concept_code",
   "title": "{{핵심_개념}}",
-  "narration": "{{설명_200~360자}}"
+  "narration": "{{설명_200~360자}}",
+  "visual": { "type": "step_flow", "data": "{{시각화_데이터}}" }
 }</pre>
         </section>
       </div>
       <section class="card wide">
-        <p class="tag ok">평가 문항 파이프라인 (QuizMaker)</p>
-        <p>LangGraph StateGraph 기반으로 객관식 3지선다 5문제(핵심 1문 + 확장 1문 + 응용 1문 + 코드 심화 2문)를 생성하며, 교차 검증 실패 시 교정 루프를 수행하고 교정 불가 시 해당 문항만 선별 재생성합니다.</p>
+        <p class="tag ok">실전 모의고사 파이프라인 (ExamForge · 20종 유형 × 4에이전트 병렬 + 최대 3회 자가교정)</p>
+        <p>20종 문제 유형(한국어 9·영어 8·자격 3)을 바탕으로 4개 에이전트가 ×4 병렬로 문항을 출제합니다. 생성 전 시드 기반으로 정답 번호를 균등 배정(<code>balanced_target_positions</code>)해 번호 쏠림을 막고, 교차 검증에서 참인 오답이나 출처 이탈이 발견되면 해당 문항만 최대 3회 자동 교정(불가 시 재생성)합니다.</p>
         <ol class="steps">
           <li>자료 분석</li>
           <li>출제 계획</li>
-          <li>문제 생성</li>
-          <li>오답 생성</li>
-          <li>해설 작성</li>
+          <li>문제 ×4 병렬</li>
+          <li>오답 구성</li>
+          <li>정답 해설</li>
           <li>교차 검증</li>
-          <li>실패 시 교정</li>
+          <li>실패 시 교정(≤3회)</li>
           <li>불가 시 재생성</li>
         </ol>
       </section>
@@ -396,46 +391,44 @@
         <span>흐름</span>
         <span>기록</span>
       </header>
-      <h2>고가용성 장애 대응 및 트러블슈팅</h2>
-      <p class="deck">기획 Opus · 양산 Qwen · 폴백 Sonnet의 3단계 연결과 오디오 float32 정규화 파이프라인을 구축했습니다.</p>
+      <h2>다단계 장애 폴백 · TTS 정규화 트러블슈팅 · MSA 경계</h2>
+      <p class="deck">작업별 모델 라우팅과 장애 우회 체인을 구축하고, TTS 오디오 텐서 정규화로 음성 클리핑 잡음을 해결했습니다.</p>
       <div class="two">
         <section class="card">
-          <p class="tag warn">안정성 설계</p>
-          <h3>역할 기반 모델 라우팅 & 대체 회로</h3>
-          <p class="k">기획과 양산의 분리 및 비상 우회로</p>
-          <p>커리큘럼 전체 기획과 슬라이드 본문 대량 양산의 역할을 분리하고 장애 대응 회로를 구축했습니다.</p>
-          <p class="k">엔지니어링 조치</p>
+          <p class="tag warn">고가용성 설계</p>
+          <h3>역할별 모델 분리 &amp; 다단계 자동 폴백</h3>
+          <p class="k">계층형 라우팅</p>
           <ul>
-            <li>커리큘럼 기획 (Planner): Claude Opus 4.6 API (커리큘럼당 1회 호출로 비용 부담 없이 전체 맥락 설계)</li>
-            <li>대량 양산 (SlideGenerator): Modal B200 GPU (Qwen3.6-27B Dense FP8, vLLM 병렬)</li>
-            <li>생성 폴백 (Fallback): Qwen 서빙 지연 또는 검증 실패 시 Claude Sonnet으로 자동 절체</li>
+            <li><b>기획(Planner)</b>: Claude Opus 4.6 (커리큘럼당 1회 호출로 전체 흐름 고정)</li>
+            <li><b>본문 양산</b>: Modal B200 Qwen3.6-27B Dense FP8 (vLLM 병렬 서빙)</li>
+            <li><b>질의응답·채점</b>: Claude Sonnet 4.6 (보조 필터 Haiku 4.5, 후처리 Kanana 2.1B)</li>
           </ul>
-          <p class="small">상용 초거대 API 단독 호출 대비 약 76%~79%의 연산 비용을 절감하면서 27% 마진을 확보했습니다.</p>
+          <p class="k">장애 우회 및 토큰 클램프</p>
+          <p>주 경로(Modal GPU) 타임아웃·오류 시 Gemini → Claude Sonnet / OpenAI 순으로 자동 전환하며, 모델 간 최대 출력 토큰 차이로 인한 400 오류를 막기 위해 <code>max_tokens=16384</code> 클램프를 적용했습니다.</p>
         </section>
         <section class="card">
           <p class="tag ok">트러블슈팅</p>
-          <h3>TTS 음성 오디오 float32 정규화 파이프라인</h3>
-          <p class="k">문제 상황 (음성 깨짐 및 잡음)</p>
-          <p>Qwen3-TTS 생성 오디오를 WAV 파일로 변환 시 심한 찌직거림과 음성 깨짐 현상이 발생했습니다.</p>
-          <p class="k">원인 분석</p>
-          <p>추론 출력 버퍼의 dtype(float16/비정규화) 불일치 상태에서 soundfile WAV 인코더로 전달되어 16-bit PCM 변환 시 양자화 클리핑(Clipping)이 발생함.</p>
-          <p class="k">해결책 및 결과</p>
+          <h3>TTS 오디오 <code>float32</code> 정규화 및 비동기 큐 분리</h3>
+          <p class="k">문제 및 원인 (음성 깨짐 현상)</p>
+          <p>Qwen3-TTS 추론 출력 텐서(<code>float16</code>·비정규화 범위)를 그대로 <code>soundfile</code> PCM_16 WAV 인코더에 전달하면서 비트 깊이 변환 오버플로와 클리핑 잡음이 발생했습니다.</p>
+          <p class="k">해결 및 결과</p>
           <ul>
-            <li>오디오 버퍼를 명시적으로 np.float32로 변환 후 [-1.0, 1.0] 범위로 클리핑 정규화 구축</li>
-            <li>오디오 왜곡률 0% 달성, 깨끗한 16-bit PCM 고음질 음성 합성 확보</li>
+            <li><code>np.clip(audio.astype(np.float32, copy=False), -1.0, 1.0)</code> 전처리로 클리핑 잡음 제거</li>
+            <li>참조 음성과 참조 문장을 함께 고정해 화자 유사도 <b>0.964~0.976</b>(std 0.0006) 달성</li>
+            <li>슬라이드 파이프라인은 대본만 <code>voice_script_queue</code>에 넣고 TTS 워커가 비동기 합성</li>
           </ul>
         </section>
       </div>
       <section class="card wide">
-        <p class="tag">마이크로서비스 경계</p>
+        <p class="tag">마이크로서비스 경계와 데이터베이스 접근 기준</p>
         <div class="why-grid">
           <div>
-            <h3>Spring과 FastAPI의 책임 분리</h3>
-            <p>수명주기, 장애 영향도, 대규모 비동기 I/O(`asyncio`)와 의존 라이브러리(PyTorch, vLLM)의 특성이 다른 AI 워크로드를 Spring 메인 스레드로부터 완전히 격리했습니다. 인증·결제·유저 상태 관리는 Spring이 전담합니다.</p>
+            <h3>Spring 코어와 FastAPI AI 서버의 역할 분담</h3>
+            <p>인증·결제·코인 차감(원자적 조건부 <code>UPDATE</code>) 등 정합성이 중요한 트랜잭션은 Spring Boot가 전담하고, FastAPI는 VPC 내부망에서 추론·검색·합성 워크로드만 수행합니다. 대용량 5대 산출물 적재는 FastAPI가 <code>asyncpg</code>로 직접 INSERT하고, 채점 완료 이벤트는 3회 재시도 웹훅으로 Spring에 콜백합니다.</p>
           </div>
           <div>
-            <h3>초당 과금 기반 연산 통제</h3>
-            <p>Modal B200 인스턴스의 초당 단가($0.001736/초)를 활용하여, 1개 강의 생성 시 필요한 연산 시간(120초)에만 비용이 발생하도록 설계하여 불필요한 GPU 유휴 비용을 최소화했습니다.</p>
+            <h3>비용 구조: 상용 단독 대비 76~79% 절감</h3>
+            <p>1,000명 운영 시나리오(월 구독 ₩50,000) 기준 All Opus(월 ₩78.87M, 적자) 및 All Sonnet(월 ₩43.72M) 대비 계층형 라우팅으로 월 비용을 <b>₩36.75M</b>으로 낮춰 약 <b>26~27% 운영 마진</b>을 확보했습니다.</p>
           </div>
         </div>
       </section>
@@ -455,43 +448,43 @@
         <span>기록</span>
       </header>
       <h2>LangGraph 파이프라인 워크플로우</h2>
-      <p class="deck">상태 기반 그래프(StateGraph)를 통해 복잡한 조건부 분기와 선별 재시도 루프를 통제합니다.</p>
-      <h3 class="label">강의 일괄 생성 워크플로우</h3>
+      <p class="deck">조건부 분기, 교차 검증, 실패 조각 선별 재시도가 필요한 구간을 LangGraph StateGraph로 설계해 상태를 통제합니다.</p>
+      <h3 class="label">강의 일괄 생성 및 검증·음성 워크플로우 (ChapterStudio)</h3>
       <ol class="steps big">
         <li>컨텍스트<br /><span>Qdrant 검색 문맥</span></li>
         <li>기획<br /><span>Opus 4.6 1회</span></li>
         <li>슬라이드<br /><span>Qwen 27B 병렬</span></li>
-        <li>퀴즈<br /><span>5문항 생성</span></li>
-        <li>노트<br /><span>핵심 요약</span></li>
-        <li>과제<br /><span>실습 과제</span></li>
-        <li>음성 큐<br /><span>대본 비동기</span></li>
-        <li>TTS<br /><span>float32 정규화</span></li>
+        <li>내용 검증<br /><span>1회 교정·재검증</span></li>
+        <li>퀴즈·노트·과제<br /><span>동시 병렬 생성</span></li>
+        <li>정답 균등화<br /><span>인덱스 0~3 배정</span></li>
+        <li>음성 대본 큐<br /><span>4섹션·중복제거</span></li>
+        <li>TTS 합성<br /><span>float32·청크합성</span></li>
       </ol>
-      <p class="small">Opus 기획 후 슬라이드·퀴즈·노트·과제는 동시에 생성하고, 음성은 대본 완료 즉시 비동기 큐로 위임하여 파이프라인을 분리했습니다.</p>
-      <h3 class="label">교재 OCR 및 검색 인덱싱 파이프라인</h3>
+      <p class="small">슬라이드 생성 후 사실·논리 검증(지적 필드 1회 교정, 인덱스 파손 시 원본 복구)을 거치며, 음성은 대본 큐 적재 후 백그라운드 워커가 합성합니다.</p>
+      <h3 class="label">교재 OCR 및 하이브리드 검색 인덱싱 파이프라인</h3>
       <ol class="steps">
         <li>PDF 입력</li>
         <li>페이지 분류</li>
-        <li>Marker 파싱</li>
+        <li>Marker 추출</li>
         <li>품질 게이트</li>
-        <li>실패 페이지만 MinerU</li>
-        <li>청킹</li>
+        <li>실패 시 MinerU</li>
+        <li>Kanana 후처리</li>
         <li>BGE-M3 임베딩</li>
         <li>Qdrant 저장</li>
       </ol>
-      <h3 class="label">기능별 처리 방식 매핑</h3>
+      <h3 class="label">모듈별 핵심 제어 방식</h3>
       <div class="mini-three">
         <div>
-          <p><b>커리큘럼 기획 & 슬라이드</b></p>
-          <p>Opus 4.6이 전체 목차 기획 → Qwen3.6-27B Dense FP8이 1슬라이드 1컨텍스트로 vLLM N-병렬 생성 (지연 76.8% 단축)</p>
+          <p><b>슬라이드 &amp; 내용 검증</b></p>
+          <p>Opus 4.6 기획 슬롯 기반 Qwen3.6-27B vLLM 병렬 생성 → 내용 검증·교정 → Shiki·nh3 후처리 및 <code>iframe sandbox</code> 격리</p>
         </div>
         <div>
-          <p><b>퀴즈 & 암기노트 & 과제</b></p>
-          <p>객관식 3지선다 5문제 구조화, 핵심 개념 요약 노트, 코드 작성 실습 과제 및 평가 기준 가이드 동시 생성</p>
+          <p><b>퀴즈 · 모의고사 · 과제 채점</b></p>
+          <p>정답 위치 균등 배정(<code>balanced_target_positions</code>), 모의고사 4병렬 생성 + 3회 교차검증, 과제 비동기 채점 및 Spring 3회 콜백</p>
         </div>
         <div>
-          <p><b>음성 합성 & 교재 검색</b></p>
-          <p>대본 DB 큐 분리 + Qwen3-TTS float32 정규화(잡음 0%), Marker+MinerU 하이브리드 OCR과 Qdrant 벡터 검색</p>
+          <p><b>음성 수업(TTS) &amp; 음성 질문(ASR)</b></p>
+          <p>대본 4섹션 구조화·인사말 중복 제거 후 Qwen3-TTS <code>float32</code> 합성, 학생 질문은 Silero VAD + Whisper Turbo(CER 0.009) 전사</p>
         </div>
       </div>
     </article>
@@ -512,39 +505,38 @@
       <h2>핵심 실측 지표 요약 및 엔지니어링 회고</h2>
       <table class="wide-table">
         <thead>
-          <tr><th>항목</th><th>이전 상태 (Baseline)</th><th>최적화 결과</th><th>엔지니어링 임팩트</th></tr>
+          <tr><th>측정 항목</th><th>이전 상태 (Baseline)</th><th>개선 결과</th><th>비고 및 엔지니어링 임팩트</th></tr>
         </thead>
         <tbody>
-          <tr><td>15슬라이드 1강 생성 (검증·음성 포함)</td><td>순차 파이프라인 518s</td><td>vLLM 병렬 할당 120s</td><td><strong>76.8% 단축 (4.3배 가속)</strong></td></tr>
-          <tr><td>GPU 인스턴스 기동 지연</td><td>초기 콜드스타트 12.4s</td><td>메모리 사전 로드 0.8s</td><td><strong>93.5% 단축 (15.5배 가속)</strong></td></tr>
-          <tr><td>교재 OCR 문자오류율 (CER)</td><td>PaddleOCR 48.8% / VL 75.9%</td><td>하이브리드 게이트 적용 0.222</td><td><strong>98.6% 개선 (수식·표 보존율 100%)</strong></td></tr>
-          <tr><td>모델 연산 비용 효율성</td><td>상용 초거대 API 전량 의존</td><td>자체 서빙 및 계층 라우팅</td><td><strong>비용 약 76%~79% 절감 (마진 27% 확보)</strong></td></tr>
-          <tr><td>음성 합성 품질 (Qwen3-TTS)</td><td>오디오 텐서 dtype 왜곡 및 잡음</td><td>float32 정규화 파이프라인</td><td><strong>잡음·왜곡 0%, 화자 유사도 0.964~0.976</strong></td></tr>
+          <tr><td>15슬라이드 1강 생성 시간</td><td>순차 518s (검증·음성 통합 462s)</td><td>vLLM 병렬 할당 120s</td><td><strong>76.8% 단축 (4.3배 가속, B200 실측)</strong></td></tr>
+          <tr><td>1강 생성 비용 / 유휴 유지비</td><td>외부 API 토큰 종량 과금</td><td>강의당 $0.38 / 미사용 $0</td><td><strong>초당 과금($0.001736/s) 기반 정밀 비용 통제</strong></td></tr>
+          <tr><td>GPU 컨테이너 기동 지연</td><td>초기 콜드스타트 12.4s</td><td>스토리지 사전 로드 0.8s</td><td><strong>93.5% 단축 (15.5배 가속, API 오버헤드 &lt; 0.1s)</strong></td></tr>
+          <tr><td>교재 OCR 문자오류율 (CER)</td><td>ONNX 48.8% / VL 단독 75.9%</td><td>게이트 + 후처리 CER 0.222</td><td><strong>Marker+MinerU 선별 추출, 후처리 98.6% 오류 감소</strong></td></tr>
+          <tr><td>월간 LLM 운영 비용 (1,000명 가정)</td><td>All Opus ₩78.87M / Sonnet ₩43.72M</td><td>계층형 라우팅 ₩36.75M</td><td><strong>상용 단독 대비 76~79% 절감, 운영 마진 ~27% 확보</strong></td></tr>
+          <tr><td>음성 합성(TTS) / 음성 인식(ASR)</td><td>TTS CER 0.221 · 클리핑 잡음</td><td>유사도 0.964~0.976 / ASR CER 0.009</td><td><strong>float32 정규화 적용, TTS CER 0.010~0.019 달성</strong></td></tr>
         </tbody>
       </table>
       <div class="two">
         <section class="card">
-          <h3>이 프로젝트에서 이뤄낸 엔지니어링 성과</h3>
+          <h3>핵심 엔지니어링 기여 요약</h3>
           <ul>
-            <li>Spring 코어와 FastAPI AI 런타임의 마이크로서비스 완전 분리</li>
-            <li>Modal B200 초당 단가($0.001736/초) 기반 연산 통제 및 120초 생성 달성</li>
-            <li>SkillsBench 48.2(+68%)의 Qwen3.6-27B Dense FP8 채택 및 vLLM 병렬 서빙</li>
-            <li>SlideDesignSystem 16종 락과 백엔드 Shiki 후처리, iframe sandbox 격리</li>
-            <li>기획 Opus 4.6 · 생성 Qwen 27B · 폴백 Sonnet의 3단계 고가용성 회로 구축</li>
-            <li>TTS 오디오 float32 정규화를 통한 음성 깨짐 완벽 해결</li>
+            <li>Spring 코어와 FastAPI 추론 서버 분리 및 비동기 Job/콜백 구조 설계</li>
+            <li>SkillsBench +68% 우위를 검증한 Qwen3.6-27B Dense FP8 선정 및 vLLM 병렬 서빙</li>
+            <li>파인튜닝 없이 품질을 고정하는 <code>{{빈칸}}</code> 템플릿(강의 16종·시험 20종)과 <code>iframe sandbox</code> 격리</li>
+            <li>Marker·MinerU 품질 게이트, BGE-M3 Dense+Sparse 하이브리드 RAG 구축</li>
+            <li>TTS <code>float32</code> 클리핑 정규화, 대본 중복 제거 및 다단계 폴백 체인 구현</li>
           </ul>
         </section>
         <section class="card">
-          <h3>엔지니어링 회고 및 프로덕션 고도화 과제</h3>
+          <h3>엔지니어링 회고 및 향후 과제</h3>
           <ul>
-            <li>파이프라인 생성 속도의 핵심은 모델 추론뿐 아니라 비동기 큐 분리와 동시성 제어임을 검증</li>
-            <li>작업 특성에 맞춘 계층적 라우팅이 대규모 AI 서비스의 비용 구조(-76%~-79% 절감)를 결정함을 체감</li>
-            <li>오디오 엔지니어링에서 텐서 데이터 타입(float32)과 동적 범위 정규화의 중요성을 깊이 학습</li>
-            <li>고도화 과제: 슬라이드 20장 초과 시 동적 배치 조절, 저화질 스캔본 보강, 장애 전환 시 비용 폭증을 방어하는 호출 한도 제어 도입</li>
+            <li><b>구조적 제약의 효과</b>: 프롬프트 수정이나 파인튜닝보다 코드 템플릿 고정과 결정적 검증 함수가 출력 일관성과 비용($0) 면에서 효과적이었습니다.</li>
+            <li><b>비용과 지연의 분리</b>: 기획(1회 고성능 API)과 양산(GPU 시간 과금 병렬 서빙), 합성(비동기 큐)을 분리해 체감 대기 시간과 단가를 동시에 낮췄습니다.</li>
+            <li><b>남은 과제</b>: 슬라이드 수와 가용 VRAM에 따른 동적 배치 크기 조절, Modal 환경 TTS RTF 실측 검증, 폴백 전환 시 강의당 비용 상한(Budget Cap) 도입을 계획하고 있습니다.</li>
           </ul>
         </section>
       </div>
-      <p class="foot-links">데모 https://algocean1204.github.io/SW-ilgwa/ · 레포 https://github.com/algocean1204/SW-ilgwa</p>
+      <p class="foot-links">데모 <a href="https://algocean1204.github.io/SW-ilgwa/">algocean1204.github.io/SW-ilgwa</a> · 레포 <a href="https://github.com/algocean1204/SW-ilgwa">github.com/algocean1204/SW-ilgwa</a> · 발표자료 <a href="https://github.com/algocean1204/SW-ilgwa/blob/main/docs/ilgwa-presentation.pdf">docs/ilgwa-presentation.pdf</a></p>
     </article>
   </div>
   <script src="./app.js"></script>
