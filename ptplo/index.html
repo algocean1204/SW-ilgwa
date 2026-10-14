@@ -15,7 +15,7 @@
       <p class="cover-kicker">PORTFOLIO</p>
       <h1>AI 시스템 아키텍처와<br />FastAPI 파이프라인을 설계·구현한<br />일과 · ilgwa</h1>
       <p class="cover-sub">교재 PDF·주제 기반 맞춤형 AI 강의·음성 수업·모의고사 자동 생성 플랫폼</p>
-      <p class="cover-meta">김태규 (owen.kim) · AI 아키텍처 설계 &amp; FastAPI 백엔드 담당 · 2026.04 ~ 2026.06 (11주, 2인 팀 · 기여 50%)<br />LangGraph · vLLM · Modal B200 GPU · Qwen3.6-27B · Qdrant · BGE-M3 · Qwen3-TTS · FastAPI</p>
+      <p class="cover-meta">김태규 (owen.kim) · AI 아키텍처 설계 &amp; FastAPI 백엔드 담당 · 2026.04 ~ 2026.06 (개발 11주 · 2인 팀)<br />LangGraph · vLLM · Modal B200 GPU · Qwen3.6-27B · Qdrant · BGE-M3 · Qwen3-TTS · FastAPI</p>
     </article>
 
     <!-- 2. 소개 -->
@@ -58,8 +58,8 @@
           <h3>생성 시간 76.8% 단축 &amp; $0.38 과금</h3>
           <p>순차 생성을 컨텍스트 분할 기반 vLLM 병렬 추론으로 전환했습니다.</p>
           <ul>
-            <li>15슬라이드 1강 생성: 518s → 120s (검증·음성 통합 기준 462s → 120s)</li>
-            <li>가중치 사전 로드로 콜드스타트 12.4s → 0.8s (15.5배 단축)</li>
+            <li>15슬라이드 1강 생성: 518초 → 120초 (76.8% 단축, 4.3배 가속)</li>
+            <li>가중치 사전 로드로 기동 지연 12.4초 → 0.8초 (15.5배 단축)</li>
             <li>GPU 사용 시간 과금으로 1강 생성 $0.38, 미사용 시 유지비 $0 달성</li>
           </ul>
         </section>
@@ -78,7 +78,7 @@
           <ul>
             <li>Spring(인증·결제·트랜잭션) ↔ FastAPI(추론·RAG·TTS) 분리</li>
             <li>기획 Opus 4.6 · 양산 Qwen3.6-27B · 채점/Q&amp;A Sonnet 4.6 배치</li>
-            <li>상용 API 단독 호출 대비 비용 76~79% 절감 (운영 마진 ~27%)</li>
+            <li>상용 API 단독 호출 대비 비용 76~79% 절감 (운영 마진 약 27%)</li>
           </ul>
         </section>
       </div>
@@ -104,7 +104,7 @@
           <h3 class="label">개요</h3>
           <ul class="plain">
             <li>기간: 2026.04 ~ 2026.06 (개발 11주)</li>
-            <li>인원: 2명 (기여도 50% : 50%)</li>
+            <li>인원: 2명 (설계·AI 50% / 코어·배포 50%)</li>
             <li>내 역할: AI 시스템 아키텍처 설계, FastAPI 서버, LangGraph 에이전트 파이프라인</li>
             <li>팀원(김나경): Spring Boot 코어 서버, AWS·Terraform 배포 자동화</li>
             <li>데모: algocean1204.github.io/SW-ilgwa/</li>
@@ -124,7 +124,7 @@
               <strong>Plan-First &amp; vLLM 병렬 추론으로 120초·$0.38 달성</strong>
               <ul>
                 <li>Opus 4.6 1회 기획 후 슬라이드 15장·퀴즈·노트·과제 동시 생성</li>
-                <li>1강 생성 518s → 120s (76.8% 단축), 콜드스타트 12.4s → 0.8s</li>
+                <li>1강 생성 518초 → 120초 (76.8% 단축), 기동 지연 12.4초 → 0.8초</li>
               </ul>
             </li>
             <li>
@@ -142,9 +142,9 @@
               </ul>
             </li>
             <li>
-              <strong>4에이전트 ×4 병렬 모의고사 출제 및 교차검증 루프</strong>
+              <strong>멀티 에이전트 병렬 모의고사 출제 및 교차검증 루프</strong>
               <ul>
-                <li>20종 문제 유형 대상 4병렬 생성 및 정답 위치 균등 사전 배정</li>
+                <li>20종 문제 유형 대상 4개 에이전트 병렬 생성 및 정답 위치 균등 배정</li>
                 <li>교차 검증 실패 문항만 최대 3회 자가교정(불가 시 선별 재생성)</li>
               </ul>
             </li>
@@ -163,7 +163,7 @@
           <h3 class="label">운영 및 품질 지표</h3>
           <ul class="plain">
             <li>토큰 과금 대신 GPU 사용 시간 과금으로 1강 $0.38·유휴 유지비 $0 구현</li>
-            <li>상용 모델 단독 호출 대비 연산 비용 76~79% 절감 (마진 ~27% 확보)</li>
+            <li>상용 모델 단독 호출 대비 연산 비용 76~79% 절감 (마진 약 27% 확보)</li>
             <li>TTS 오디오 <code>float32</code> 클리핑 정규화로 잡음 제거 및 유사도 0.964~0.976 달성</li>
             <li>Modal 장애 시 Gemini · Claude · OpenAI 다단계 폴백 체인 연결</li>
           </ul>
@@ -197,7 +197,7 @@
         </figure>
         <figure class="shot">
           <img src="./shots/05-exam.png" alt="실전 모의고사">
-          <figcaption>실전 모의고사 · 20종 유형 ×4 병렬 출제 및 AI 약점 리포트</figcaption>
+          <figcaption>실전 모의고사 · 20종 유형 병렬 출제 및 AI 약점 리포트</figcaption>
         </figure>
         <figure class="shot">
           <img src="./shots/03-notes.png" alt="암기노트">
@@ -230,7 +230,7 @@
           <p class="tag warn">문제 &amp; 원인</p>
           <h3>문맥 누적 순차 생성 시 518초 소요</h3>
           <p class="k">문제 상황</p>
-          <p>슬라이드 15장과 퀴즈·노트·과제·음성을 단일 흐름으로 순차 생성할 때 1강당 518초(검증·음성 통합 측정 시 462초)가 소요되었습니다.</p>
+          <p>슬라이드 15장과 퀴즈·노트·과제·음성을 단일 흐름으로 순차 생성할 때 1강 완성에 518초(약 8분 38초)가 소요되었습니다.</p>
           <p class="k">병목 원인</p>
           <ul>
             <li>앞 슬라이드 전문을 다음 프롬프트에 누적 전달해 직렬 대기와 뒤쪽 슬라이드 형식 깨짐 발생</li>
@@ -243,11 +243,11 @@
           <p class="k">아키텍처 조치</p>
           <ul>
             <li><b>Plan-First</b>: Claude Opus 4.6이 커리큘럼당 1회 호출로 15개 슬라이드 개요 슬롯을 선제 확정</li>
-            <li><b>컨텍스트 분할 병렬화</b>: 1슬라이드 = 1컨텍스트로 독립 분할해 vLLM에서 동시 생성 (퀴즈·노트·과제 병렬 실행)</li>
-            <li><b>자체 모델 상주</b>: Modal 스토리지 사전 로드로 콜드스타트 12.4s → 0.8s 단축 (API 오버헤드 &lt; 0.1s)</li>
+            <li><b>컨텍스트 분할 병렬화</b>: 슬라이드별 독립 컨텍스트로 분할해 vLLM에서 동시 생성 (퀴즈·노트·과제 병렬 실행)</li>
+            <li><b>자체 모델 상주</b>: Modal 스토리지 사전 로드로 콜드스타트 12.4초 → 0.8초 단축 (API 오버헤드 0.1초 미만)</li>
           </ul>
           <p class="k">결과</p>
-          <p>생성 시간 <b>518s → 120s (76.8% 단축)</b>. 토큰 과금이 아닌 GPU 사용 시간(초당 $0.001736) 과금으로 <b>1강 $0.38, 미사용 유지비 $0</b> 달성.</p>
+          <p>생성 시간 <b>518초 → 120초 (76.8% 단축)</b>. 토큰 과금이 아닌 GPU 사용 시간(초당 $0.001736) 과금으로 <b>1강 $0.38, 미사용 유지비 $0</b> 달성.</p>
         </section>
       </div>
       <section class="card wide">
@@ -261,7 +261,7 @@
             <tr><td><strong>Qwen3.6-27B Dense FP8</strong></td><td><strong>48.2 (+68% 우위)</strong></td><td><strong>77.2%</strong></td><td><strong>86.2</strong></td><td><strong>94.1</strong></td><td><strong>27B 전 파라미터 상시 활성, FP8 양자화 안정성, 일관된 지연 시간</strong></td></tr>
           </tbody>
         </table>
-        <p class="small">구조화된 교육 자료와 코드 생성 정확도를 평가하는 SkillsBench에서 MoE 모델 대비 +68%(48.2 vs 28.7) 높은 점수를 확인하고 메인 양산 엔진으로 채택했습니다.</p>
+        <p class="small">구조화된 교육 자료와 코드 생성 정확도를 평가하는 SkillsBench에서 MoE 모델 대비 68%(48.2 vs 28.7) 높은 점수를 확인하고 메인 양산 엔진으로 채택했습니다.</p>
       </section>
     </article>
 
@@ -285,7 +285,7 @@
           <p class="tag warn">벤치마크 및 폐기</p>
           <h3>단일 OCR 경로의 수식·표 파손 실측</h3>
           <p class="k">실측 수치 및 판정</p>
-          <p>초기 후보였던 CPU ONNX(PP-OCRv5)는 문자오류율(CER) 48.8%(빈 출력 8.3%), PaddleOCR-VL 단독 경로는 페이지 CER 75.9%(10.39초/페이지)로 측정되어 단독 배포 불가로 판정했습니다.</p>
+          <p>초기 후보였던 CPU ONNX(PP-OCRv5)는 문자오류율(CER) 48.8%(빈 출력 8.3%), PaddleOCR-VL 단독 경로는 페이지 CER 75.9%(페이지당 10.39초)로 측정되어 단독 배포 불가로 판정했습니다.</p>
           <p class="k">원인 분석</p>
           <ul>
             <li>전공 서적의 다단 레이아웃에서 문단 읽기 순서가 뒤섞임</li>
@@ -363,12 +363,12 @@
         </section>
       </div>
       <section class="card wide">
-        <p class="tag ok">실전 모의고사 파이프라인 (ExamForge · 20종 유형 × 4에이전트 병렬 + 최대 3회 자가교정)</p>
-        <p>20종 문제 유형(한국어 9·영어 8·자격 3)을 바탕으로 4개 에이전트가 ×4 병렬로 문항을 출제합니다. 생성 전 시드 기반으로 정답 번호를 균등 배정(<code>balanced_target_positions</code>)해 번호 쏠림을 막고, 교차 검증에서 참인 오답이나 출처 이탈이 발견되면 해당 문항만 최대 3회 자동 교정(불가 시 재생성)합니다.</p>
+        <p class="tag ok">실전 모의고사 파이프라인 (ExamForge · 20종 유형 · 4개 에이전트 병렬 + 최대 3회 자가교정)</p>
+        <p>20종 문제 유형(한국어 9·영어 8·자격 3)을 바탕으로 4개 에이전트가 동시에 문항을 병렬 출제합니다. 생성 전 시드 기반으로 정답 번호를 균등 배정(<code>balanced_target_positions</code>)해 번호 쏠림을 막고, 교차 검증에서 참인 오답이나 출처 이탈이 발견되면 해당 문항만 최대 3회 자동 교정(불가 시 재생성)합니다.</p>
         <ol class="steps">
           <li>자료 분석</li>
           <li>출제 계획</li>
-          <li>문제 ×4 병렬</li>
+          <li>4에이전트 병렬</li>
           <li>오답 구성</li>
           <li>정답 해설</li>
           <li>교차 검증</li>
@@ -414,13 +414,13 @@
           <p class="k">해결 및 결과</p>
           <ul>
             <li><code>np.clip(audio.astype(np.float32, copy=False), -1.0, 1.0)</code> 전처리로 클리핑 잡음 제거</li>
-            <li>참조 음성과 참조 문장을 함께 고정해 화자 유사도 <b>0.964~0.976</b>(std 0.0006) 달성</li>
+            <li>참조 음성과 참조 문장을 함께 고정해 화자 유사도 <b>0.964~0.976</b>(표준편차 0.0006) 달성</li>
             <li>슬라이드 파이프라인은 대본만 <code>voice_script_queue</code>에 넣고 TTS 워커가 비동기 합성</li>
           </ul>
         </section>
       </div>
       <section class="card wide">
-        <p class="tag">마이크로서비스 경계와 데이터베이스 접근 기준</p>
+        <p class="tag">마이크로서비스 경계와 비용 통제 구조</p>
         <div class="why-grid">
           <div>
             <h3>Spring 코어와 FastAPI AI 서버의 역할 분담</h3>
@@ -428,7 +428,7 @@
           </div>
           <div>
             <h3>비용 구조: 상용 단독 대비 76~79% 절감</h3>
-            <p>1,000명 운영 시나리오(월 구독 ₩50,000) 기준 All Opus(월 ₩78.87M, 적자) 및 All Sonnet(월 ₩43.72M) 대비 계층형 라우팅으로 월 비용을 <b>₩36.75M</b>으로 낮춰 약 <b>26~27% 운영 마진</b>을 확보했습니다.</p>
+            <p>전체 흐름을 설계하는 기획(Opus 4.6 1회 호출)과 대량 본문 양산(Modal B200 Qwen3.6-27B 초당 과금 서빙)을 분리해, 상용 초거대 API 전량 호출 대비 모델 연산 비용을 <b>76~79% 절감</b>하고 <b>약 27%의 운영 마진</b>을 확보했습니다.</p>
           </div>
         </div>
       </section>
@@ -480,7 +480,7 @@
         </div>
         <div>
           <p><b>퀴즈 · 모의고사 · 과제 채점</b></p>
-          <p>정답 위치 균등 배정(<code>balanced_target_positions</code>), 모의고사 4병렬 생성 + 3회 교차검증, 과제 비동기 채점 및 Spring 3회 콜백</p>
+          <p>정답 위치 균등 배정(<code>balanced_target_positions</code>), 모의고사 4에이전트 병렬 생성 + 3회 교차검증, 과제 비동기 채점 및 Spring 3회 콜백</p>
         </div>
         <div>
           <p><b>음성 수업(TTS) &amp; 음성 질문(ASR)</b></p>
@@ -508,12 +508,12 @@
           <tr><th>측정 항목</th><th>이전 상태 (Baseline)</th><th>개선 결과</th><th>비고 및 엔지니어링 임팩트</th></tr>
         </thead>
         <tbody>
-          <tr><td>15슬라이드 1강 생성 시간</td><td>순차 518s (검증·음성 통합 462s)</td><td>vLLM 병렬 할당 120s</td><td><strong>76.8% 단축 (4.3배 가속, B200 실측)</strong></td></tr>
-          <tr><td>1강 생성 비용 / 유휴 유지비</td><td>외부 API 토큰 종량 과금</td><td>강의당 $0.38 / 미사용 $0</td><td><strong>초당 과금($0.001736/s) 기반 정밀 비용 통제</strong></td></tr>
-          <tr><td>GPU 컨테이너 기동 지연</td><td>초기 콜드스타트 12.4s</td><td>스토리지 사전 로드 0.8s</td><td><strong>93.5% 단축 (15.5배 가속, API 오버헤드 &lt; 0.1s)</strong></td></tr>
+          <tr><td>15슬라이드 1강 생성 시간</td><td>순차 파이프라인 518초</td><td>vLLM 병렬 할당 120초</td><td><strong>76.8% 단축 (4.3배 가속, B200 실측)</strong></td></tr>
+          <tr><td>1강 생성 비용 / 유휴 유지비</td><td>외부 API 토큰 종량 과금</td><td>강의당 $0.38 / 미사용 $0</td><td><strong>초당 과금($0.001736/초) 기반 정밀 비용 통제</strong></td></tr>
+          <tr><td>GPU 컨테이너 기동 지연</td><td>초기 콜드스타트 12.4초</td><td>스토리지 사전 로드 0.8초</td><td><strong>93.5% 단축 (15.5배 가속, 오버헤드 0.1초 미만)</strong></td></tr>
           <tr><td>교재 OCR 문자오류율 (CER)</td><td>ONNX 48.8% / VL 단독 75.9%</td><td>게이트 + 후처리 CER 0.222</td><td><strong>Marker+MinerU 선별 추출, 후처리 98.6% 오류 감소</strong></td></tr>
-          <tr><td>월간 LLM 운영 비용 (1,000명 가정)</td><td>All Opus ₩78.87M / Sonnet ₩43.72M</td><td>계층형 라우팅 ₩36.75M</td><td><strong>상용 단독 대비 76~79% 절감, 운영 마진 ~27% 확보</strong></td></tr>
-          <tr><td>음성 합성(TTS) / 음성 인식(ASR)</td><td>TTS CER 0.221 · 클리핑 잡음</td><td>유사도 0.964~0.976 / ASR CER 0.009</td><td><strong>float32 정규화 적용, TTS CER 0.010~0.019 달성</strong></td></tr>
+          <tr><td>모델 연산 비용 효율성</td><td>상용 초거대 API 전량 호출</td><td>자체 서빙 및 계층형 라우팅</td><td><strong>상용 단독 대비 76~79% 절감 (운영 마진 약 27%)</strong></td></tr>
+          <tr><td>음성 합성(TTS) / 음성 인식(ASR)</td><td>TTS CER 0.221 · 클리핑 잡음</td><td>유사도 0.964~0.976 / ASR CER 0.009</td><td><strong>float32 정규화 적용, 재인식 CER 0.010~0.019 달성</strong></td></tr>
         </tbody>
       </table>
       <div class="two">
