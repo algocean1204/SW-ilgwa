@@ -46,10 +46,10 @@
         <div class="intro-side">
           <h3 class="label">SKILL</h3>
           <p><b>AI 파이프라인</b> LangGraph, RAG, vLLM, FastAPI</p>
-          <p><b>자체 서빙·음성</b> Modal B200, Qwen3.6-27B FP8, Qwen3-TTS, Whisper Turbo</p>
+          <p><b>자체 서빙·음성</b> Modal B200, Qwen3.6-27B FP8, Kanana 2.1B(CPU), Qwen3-TTS, Whisper</p>
           <p><b>기획·검색·검증</b> Claude Opus 4.6 / Sonnet 4.6, Qdrant, BGE-M3, Marker·MinerU</p>
           <h3 class="label">ROLE</h3>
-          <p>AI 시스템 아키텍처 설계 · FastAPI 백엔드 개발 · LangGraph 파이프라인 및 GPU 서빙 최적화</p>
+          <p>AI 시스템 아키텍처 설계 · FastAPI 백엔드 개발 · LangGraph 파이프라인 및 GPU/CPU 서빙 최적화</p>
         </div>
       </div>
       <p class="intro-lead">생성 지연 시간과 모델 호출 단가를 측정 데이터 기반으로 통제하고, 출력 형식과 정확도를 코드로 검증하는 AI 파이프라인을 구축했습니다.</p>
@@ -77,7 +77,7 @@
           <p>트랜잭션 코어 서버와 고부하 AI 추론 런타임을 분리했습니다.</p>
           <ul>
             <li>Spring(인증·결제·트랜잭션) ↔ FastAPI(추론·RAG·TTS) 분리</li>
-            <li>기획 Opus 4.6 · 양산 Qwen3.6-27B · 채점/Q&amp;A Sonnet 4.6 배치</li>
+            <li>기획 Opus · 양산 Qwen 27B(GPU) · 포맷팅 Kanana 2.1B(CPU) 분리</li>
             <li>상용 API 단독 호출 대비 비용 76~79% 절감 (운영 마진 약 27%)</li>
           </ul>
         </section>
@@ -162,7 +162,7 @@
           </div>
           <h3 class="label">운영 및 품질 지표</h3>
           <ul class="plain">
-            <li>토큰 과금 대신 GPU 사용 시간 과금으로 1강 $0.38·유휴 유지비 $0 구현</li>
+            <li>GPU 시간 과금(1강 $0.38·유휴 $0) 및 포맷팅 Kanana CPU 분리로 자원 절감</li>
             <li>상용 모델 단독 호출 대비 연산 비용 76~79% 절감 (마진 약 27% 확보)</li>
             <li>TTS 오디오 <code>float32</code> 클리핑 정규화로 잡음 제거 및 유사도 0.964~0.976 달성</li>
             <li>Modal 장애 시 Gemini · Claude · OpenAI 다단계 폴백 체인 연결</li>
@@ -391,20 +391,20 @@
         <span>흐름</span>
         <span>기록</span>
       </header>
-      <h2>다단계 장애 폴백 · TTS 정규화 트러블슈팅 · MSA 경계</h2>
-      <p class="deck">작업별 모델 라우팅과 장애 우회 체인을 구축하고, TTS 오디오 텐서 정규화로 음성 클리핑 잡음을 해결했습니다.</p>
+      <h2>CPU·GPU 역할 분리 · 다단계 장애 폴백 · TTS 정규화 트러블슈팅</h2>
+      <p class="deck">포맷팅 작업을 CPU로 분리해 GPU 자원을 아끼고, 다단계 장애 우회 체인과 TTS 오디오 정규화 파이프라인을 구축했습니다.</p>
       <div class="two">
         <section class="card">
-          <p class="tag warn">고가용성 설계</p>
-          <h3>역할별 모델 분리 &amp; 다단계 자동 폴백</h3>
-          <p class="k">계층형 라우팅</p>
+          <p class="tag warn">리소스 &amp; 가용성 설계</p>
+          <h3>역할별 모델·하드웨어 분리 &amp; 다단계 폴백</h3>
+          <p class="k">계층형 라우팅 및 CPU 포맷팅 분리</p>
           <ul>
-            <li><b>기획(Planner)</b>: Claude Opus 4.6 (커리큘럼당 1회 호출로 전체 흐름 고정)</li>
-            <li><b>본문 양산</b>: Modal B200 Qwen3.6-27B Dense FP8 (vLLM 병렬 서빙)</li>
-            <li><b>질의응답·채점</b>: Claude Sonnet 4.6 (보조 필터 Haiku 4.5, 후처리 Kanana 2.1B)</li>
+            <li><b>기획 · 양산</b>: Opus 4.6(1회 기획) + Modal B200 Qwen3.6-27B(vLLM 병렬 양산)</li>
+            <li><b>포맷팅 · 후처리 (CPU 분리)</b>: <b>Kanana Nano 2.1B(Q4_K_M GGUF)</b>를 <code>llama.cpp</code> CPU 전용(<code>N_GPU_LAYERS=0</code>, 4스레드, 22.3 tok/s)으로 구동해 GPU 자원 절감 (검증 실패 시 Jinja2 템플릿 폴백)</li>
+            <li><b>질의응답 · 채점</b>: Claude Sonnet 4.6 (보조 필터 Haiku 4.5)</li>
           </ul>
           <p class="k">장애 우회 및 토큰 클램프</p>
-          <p>주 경로(Modal GPU) 타임아웃·오류 시 Gemini → Claude Sonnet / OpenAI 순으로 자동 전환하며, 모델 간 최대 출력 토큰 차이로 인한 400 오류를 막기 위해 <code>max_tokens=16384</code> 클램프를 적용했습니다.</p>
+          <p>Modal GPU 타임아웃·오류 시 Gemini → Sonnet / OpenAI 순으로 자동 전환하며, 모델 간 최대 출력 토큰 차이로 인한 400 오류를 막기 위해 <code>max_tokens=16384</code> 클램프를 적용했습니다.</p>
         </section>
         <section class="card">
           <p class="tag ok">트러블슈팅</p>
@@ -428,7 +428,7 @@
           </div>
           <div>
             <h3>비용 구조: 상용 단독 대비 76~79% 절감</h3>
-            <p>전체 흐름을 설계하는 기획(Opus 4.6 1회 호출)과 대량 본문 양산(Modal B200 Qwen3.6-27B 초당 과금 서빙)을 분리해, 상용 초거대 API 전량 호출 대비 모델 연산 비용을 <b>76~79% 절감</b>하고 <b>약 27%의 운영 마진</b>을 확보했습니다.</p>
+            <p>기획(Opus 4.6 1회), 대량 본문 양산(Modal B200 Qwen3.6-27B 초당 과금), 경량 포맷팅·후처리(Kanana 2.1B CPU 서빙, 한계비용 $0)로 하드웨어와 모델을 분리해 연산 비용을 <b>76~79% 절감</b>하고 <b>약 27%의 운영 마진</b>을 확보했습니다.</p>
           </div>
         </div>
       </section>
@@ -512,7 +512,7 @@
           <tr><td>1강 생성 비용 / 유휴 유지비</td><td>외부 API 토큰 종량 과금</td><td>강의당 $0.38 / 미사용 $0</td><td><strong>초당 과금($0.001736/초) 기반 정밀 비용 통제</strong></td></tr>
           <tr><td>GPU 컨테이너 기동 지연</td><td>초기 콜드스타트 12.4초</td><td>스토리지 사전 로드 0.8초</td><td><strong>93.5% 단축 (15.5배 가속, 오버헤드 0.1초 미만)</strong></td></tr>
           <tr><td>교재 OCR 문자오류율 (CER)</td><td>ONNX 48.8% / VL 단독 75.9%</td><td>게이트 + 후처리 CER 0.222</td><td><strong>Marker+MinerU 선별 추출, 후처리 98.6% 오류 감소</strong></td></tr>
-          <tr><td>모델 연산 비용 효율성</td><td>상용 초거대 API 전량 호출</td><td>자체 서빙 및 계층형 라우팅</td><td><strong>상용 단독 대비 76~79% 절감 (운영 마진 약 27%)</strong></td></tr>
+          <tr><td>모델 연산 비용 / CPU 분리</td><td>상용 API 전량 · GPU 혼용</td><td>계층 라우팅 · Kanana CPU(22.3 tok/s)</td><td><strong>비용 76~79% 절감 (마진 약 27%), 포맷팅 GPU 점유 0%</strong></td></tr>
           <tr><td>음성 합성(TTS) / 음성 인식(ASR)</td><td>TTS CER 0.221 · 클리핑 잡음</td><td>유사도 0.964~0.976 / ASR CER 0.009</td><td><strong>float32 정규화 적용, 재인식 CER 0.010~0.019 달성</strong></td></tr>
         </tbody>
       </table>
@@ -521,7 +521,7 @@
           <h3>핵심 엔지니어링 기여 요약</h3>
           <ul>
             <li>Spring 코어와 FastAPI 추론 서버 분리 및 비동기 Job/콜백 구조 설계</li>
-            <li>SkillsBench +68% 우위를 검증한 Qwen3.6-27B Dense FP8 선정 및 vLLM 병렬 서빙</li>
+            <li>SkillsBench +68% 우위를 검증한 Qwen3.6-27B(GPU) 및 포맷팅용 Kanana 2.1B(CPU) 역할 분리 서빙</li>
             <li>파인튜닝 없이 출력 품질을 고정하는 <code>{{빈칸}}</code> 템플릿(강의 16종·시험 20종)과 교차 검증 루프</li>
             <li>Marker·MinerU 품질 게이트, BGE-M3 Dense+Sparse 하이브리드 RAG 구축</li>
             <li>TTS <code>float32</code> 클리핑 정규화, 대본 중복 제거 및 다단계 폴백 체인 구현</li>
