@@ -1,0 +1,31 @@
+# backend-spring 로컬 개발용 compose
+# 사전 조건: infra 레포의 scripts/dev-up.sh로 sw-ez-shared 네트워크와 postgres/redis/qdrant를 먼저 띄운다
+name: sw-ez-spring
+
+networks:
+  # infra 레포가 만든 공유 네트워크에 조인해 DB/Redis를 서비스명으로 찾는다
+  sw-ez-shared:
+    external: true
+
+services:
+  spring:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: sw-ez-team/backend-spring:local
+    container_name: sw-ez-backend-spring
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    networks:
+      - sw-ez-shared
+    healthcheck:
+      # Actuator 없이 커스텀 /health 엔드포인트로 상태를 확인한다
+      # JRE 이미지에 wget이 있어 curl을 따로 설치하지 않는다
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s

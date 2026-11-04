@@ -1,0 +1,53 @@
+# Spring과 FastAPI가 함께 쓰는 Redis용 독립 Compose 프로젝트
+# 기동 방법 (최초 1회):
+#   docker network create ezteam-shared
+#   docker compose -f docker-compose.redis.yml up -d
+# 앱 배포(docker-compose.dev.yml)와 분리돼 있어 앱을 재배포해도 Redis는 재생성·중지되지 않는다.
+name: ezteam-redis
+
+services:
+  redis:
+    image: redis:7.4-alpine
+    container_name: ezteam-redis
+    restart: unless-stopped
+    # AOF(appendonly yes): 재시작해도 celery broker 메시지·agent job·세션을 잃지 않는다
+    # noeviction: maxmemory에 닿으면 키를 지우지 않고 에러를 돌려 broker 메시지가 사라지지 않게 한다
+    # maxmemory 256mb: t3.micro(1GB)에서 JVM과 함께 돌리기 위한 상한
+    command:
+      - redis-server
+      - --requirepass
+      - ${SPRING_DATA_REDIS_PASSWORD:?SPRING_DATA_REDIS_PASSWORD is required}
+      - --appendonly
+      - "yes"
+      - --maxmemory
+      - 256mb
+      - --maxmemory-policy
+      - noeviction
+    environment:
+      REDISCLI_AUTH: ${SPRING_DATA_REDIS_PASSWORD:?SPRING_DATA_REDIS_PASSWORD is required}
+    ports:
+      # FastAPI(별도 EC2)가 <spring_private_ip>:6379로 접속하므로 host port를 게시한다
+      - "${SPRING_REDIS_BIND_ADDR:?SPRING_REDIS_BIND_ADDR is required}:6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # maxmemory(256mb) + Redis 프로세스/AOF 버퍼 오버헤드를 감안한 컨테이너 상한
+    mem_limit: 320m
+    networks:
+      - ezteam-shared
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  redis-data:
+
+networks:
+  ezteam-shared:
+    external: true

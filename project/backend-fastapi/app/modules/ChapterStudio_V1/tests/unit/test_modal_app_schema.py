@@ -1,0 +1,190 @@
+from __future__ import annotations
+
+from app.modules.ChapterStudio_V1.deploy.modal_app import (
+    RESPONSE_SCHEMA,
+    _select_guided_schema,
+    assignment_schema,
+    note_schema,
+    quizzes_schema,
+    response_schema,
+    slides_schema,
+    supporting_materials_schema,
+    voice_script_schema,
+    voice_segment_schema,
+)
+
+
+def test_default_modal_response_schema_preserves_five_slide_demo_contract() -> None:
+    schema = RESPONSE_SCHEMA
+
+    assert schema["properties"]["slides"]["minItems"] == 5
+    assert schema["properties"]["slides"]["maxItems"] == 5
+    assert schema["properties"]["voice_scripts"]["minItems"] == 5
+    assert schema["properties"]["quizzes"]["minItems"] == 5
+
+
+def test_modal_response_schema_supports_actual_lesson_slide_count() -> None:
+    schema = response_schema(12)
+    slides = schema["properties"]["slides"]
+    voices = schema["properties"]["voice_scripts"]
+    quizzes = schema["properties"]["quizzes"]
+
+    assert slides["minItems"] == 12
+    assert slides["maxItems"] == 12
+    assert slides["items"]["properties"]["slide_idx"]["maximum"] == 11
+    assert "table" in slides["items"]["properties"]["category"]["enum"]
+    assert voices["minItems"] == 12
+    assert voices["items"]["properties"]["slide_idx"]["maximum"] == 11
+    assert voices["items"]["properties"]["script_text"]["maxLength"] == 2400
+    assert quizzes["minItems"] == 12
+    assert "slide_idx" in quizzes["items"]["required"]
+    assert quizzes["items"]["properties"]["slide_idx"]["maximum"] == 11
+    assert quizzes["items"]["properties"]["difficulty"]["enum"] == ["기억", "이해", "적용", "함정 교정", "실전 판단", "오해"]
+    assert quizzes["items"]["properties"]["explanation"]["maxLength"] == 720
+    assert schema["properties"]["note_blocks"]["minItems"] == 4
+    assert schema["properties"]["note_blocks"]["items"]["properties"]["bullets"]["minItems"] == 3
+
+
+def test_modal_voice_script_schema_supports_single_slide_retry() -> None:
+    """plan-first 섹션 스키마는 sections 배열을 guided decoding으로 강제한다."""
+    schema = voice_script_schema(15)
+
+    # 최상위 required는 slide_idx, sections다. script_text는 파생값이라 뺀다.
+    assert schema["required"] == ["slide_idx", "sections"]
+    assert schema["properties"]["slide_idx"]["maximum"] == 14
+    # sections는 정확히 4개짜리 array다.
+    sections = schema["properties"]["sections"]
+    assert sections["type"] == "array"
+    assert sections["minItems"] == 4
+    assert sections["maxItems"] == 4
+    # 각 섹션 item은 role(enum)과 text를 갖는다.
+    item = sections["items"]
+    assert item["required"] == ["role", "text"]
+    assert item["properties"]["role"]["enum"] == ["intro", "core", "example", "closing"]
+    assert item["properties"]["text"]["type"] == "string"
+
+
+def test_modal_voice_segment_schema_supports_parallel_segment_rewrite() -> None:
+    schema = voice_segment_schema(15)
+
+    assert schema["required"] == ["slide_idx", "segment_idx", "segment_text"]
+    assert schema["properties"]["slide_idx"]["maximum"] == 14
+    assert schema["properties"]["segment_idx"]["maximum"] == 3
+    assert schema["properties"]["segment_text"]["minLength"] == 180
+    assert schema["properties"]["segment_text"]["maxLength"] == 600
+
+
+def test_modal_supporting_materials_schema_scopes_quizzes_and_assignment() -> None:
+    schema = supporting_materials_schema(15)
+
+    assert schema["required"] == ["quizzes", "assignment"]
+    assert schema["properties"]["quizzes"]["minItems"] == 15
+    assert "slide_idx" in schema["properties"]["quizzes"]["items"]["required"]
+    assert schema["properties"]["assignment"]["required"] == ["title", "assignment_format", "expected_minutes", "steps", "rubric"]
+
+
+def test_slides_schema_scopes_exactly_slide_count_slides() -> None:
+    schema = slides_schema(10)
+    item = schema["properties"]["slides"]["items"]
+
+    assert schema["required"] == ["slides"]
+    assert list(schema["properties"].keys()) == ["slides"]
+    assert schema["properties"]["slides"]["minItems"] == 10
+    assert schema["properties"]["slides"]["maxItems"] == 10
+    assert item["properties"]["slide_idx"]["maximum"] == 9
+    assert item["required"] == ["slide_idx", "title", "category", "narration", "visual", "checkpoint"]
+    assert "html" not in item["properties"]
+    assert "css" not in item["properties"]
+    # plan이 없으면(None) 전체 union enum으로 폴백한다. 6개 enum만 두면 text 슬라이드가 쓰는
+    # metric-card/comparison-table을 만들 수 없어 둘 다 들어 있어야 한다.
+    full_enum = item["properties"]["visual"]["properties"]["type"]["enum"]
+    assert set(full_enum) == {
+        "number_line",
+        "comparison",
+        "comparison-table",
+        "step_flow",
+        "flow-strip",
+        "fraction_bar",
+        "concept_map",
+        "example_box",
+        "metric-card",
+    }
+
+
+def test_slides_schema_narrows_enum_to_plan_visual_types() -> None:
+    """plan_visual_types가 주어지면 visual.type enum이 그 집합으로 좁혀진다."""
+    plan_types = ["number_line", "step_flow", "metric-card"]
+    schema = slides_schema(10, plan_types)
+    enum = schema["properties"]["slides"]["items"]["properties"]["visual"]["properties"]["type"]["enum"]
+
+    # 좁힌 enum은 plan이 쓰는 type만 포함하고 full enum 순서를 보존한다.
+    assert set(enum) == set(plan_types)
+    assert enum == ["number_line", "step_flow", "metric-card"]
+    # plan에 없는 type(concept_map 등)은 schema에서 막힌다.
+    assert "concept_map" not in enum
+    assert "comparison" not in enum
+
+
+def test_slides_schema_empty_plan_falls_back_to_full_enum() -> None:
+    """plan_visual_types가 비었으면 전체 union enum으로 폴백한다(레거시·미주입 호환)."""
+    schema_none = slides_schema(10, None)
+    schema_empty = slides_schema(10, [])
+    enum_none = schema_none["properties"]["slides"]["items"]["properties"]["visual"]["properties"]["type"]["enum"]
+    enum_empty = schema_empty["properties"]["slides"]["items"]["properties"]["visual"]["properties"]["type"]["enum"]
+    assert len(enum_none) == 9
+    assert enum_none == enum_empty
+
+
+def test_select_guided_schema_routes_slides_with_plan() -> None:
+    """_select_guided_schema가 slides에서 plan_visual_types를 반영한다."""
+    schema = _select_guided_schema("slides", 10, ["number_line", "metric-card"])
+    enum = schema["properties"]["slides"]["items"]["properties"]["visual"]["properties"]["type"]["enum"]
+    assert set(enum) == {"number_line", "metric-card"}
+
+
+def test_quizzes_schema_scopes_exactly_slide_count_quizzes() -> None:
+    schema = quizzes_schema(12)
+
+    assert schema["required"] == ["quizzes"]
+    assert list(schema["properties"].keys()) == ["quizzes"]
+    assert schema["properties"]["quizzes"]["minItems"] == 12
+    assert schema["properties"]["quizzes"]["maxItems"] == 12
+
+
+def test_note_schema_scopes_four_note_blocks_with_three_bullets() -> None:
+    schema = note_schema(10)
+
+    assert schema["required"] == ["note_blocks"]
+    assert schema["properties"]["note_blocks"]["minItems"] == 4
+    assert schema["properties"]["note_blocks"]["maxItems"] == 4
+    assert schema["properties"]["note_blocks"]["items"]["properties"]["bullets"]["minItems"] == 3
+
+
+def test_assignment_schema_forces_steps_and_rubric_as_arrays() -> None:
+    schema = assignment_schema(10)
+
+    assert schema["required"] == ["assignment"]
+    assignment = schema["properties"]["assignment"]
+    assert assignment["properties"]["steps"]["type"] == "array"
+    assert assignment["properties"]["rubric"]["type"] == "array"
+    assert assignment["properties"]["rubric"]["items"]["type"] == "string"
+
+
+def test_select_guided_schema_routes_each_kind() -> None:
+    assert "slides" in _select_guided_schema("slides", 10)["properties"]
+    assert "quizzes" in _select_guided_schema("quizzes", 10)["properties"]
+    assert "note_blocks" in _select_guided_schema("note", 10)["properties"]
+    assert "assignment" in _select_guided_schema("assignment", 10)["properties"]
+    assert _select_guided_schema("voice_script", 10)["required"] == ["slide_idx", "sections"]
+    # 미지정·lesson은 기존처럼 전체 lesson 스키마로 폴백한다.
+    assert "slides" in _select_guided_schema("lesson", 10)["properties"]
+    assert "quizzes" in _select_guided_schema("unknown_kind", 10)["properties"]
+
+
+def test_slides_schema_with_slide_idx_allows_only_that_slide() -> None:
+    slides = _select_guided_schema("slides", 10, ["step_flow"], 3)["properties"]["slides"]
+
+    assert slides["minItems"] == slides["maxItems"] == 1
+    assert slides["items"]["properties"]["slide_idx"]["minimum"] == 3
+    assert slides["items"]["properties"]["slide_idx"]["maximum"] == 3
+    assert slides["items"]["properties"]["visual"]["properties"]["type"]["enum"] == ["step_flow"]

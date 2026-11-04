@@ -1,0 +1,243 @@
+# 로컬 풀스택 통합 compose
+# 프로덕션 아키텍처 근사치: Nginx → Spring / FastAPI / Frontend
+#
+# 사용법:
+#   ./scripts/dev-up.sh --full   (네트워크 생성과 전체 스택 기동을 함께 한다)
+#
+# 포함 범위:
+#   - DB 스택 (infra/docker-compose.yml: postgres/redis/qdrant/flyway/minio/minio-init)
+#   - FastAPI (이 파일에서 통합 스택용 서비스 정의: Gemini 기본값 + infra 키 주입)
+#   - Spring Boot (../backend-spring/docker-compose.yml 기준 서비스 추가)
+#   - Frontend (../frontend-web/docker-compose.yml include)
+#   - Nginx 리버스 프록시 (이 파일에서 직접 정의)
+
+name: sw-ez-local
+
+include:
+  # DB/캐시/벡터DB/S3 로컬 스택을 같은 compose 컨텍스트에 포함해 depends_on을 해석한다.
+  - path: docker-compose.yml
+  # React SPA (nginx 정적 서버)
+  - path: ../frontend-web/docker-compose.yml
+
+networks:
+  # 모든 서비스가 연결되는 공용 브리지 네트워크 (dev-up.sh가 생성)
+  sw-ez-shared:
+    external: true
+
+x-fastapi-common: &fastapi-common
+  build:
+    context: ../backend-fastapi
+    dockerfile: Dockerfile
+  image: sw-ez-team/backend-fastapi:local
+  env_file:
+    - path: ../backend-fastapi/.env
+      required: false
+  environment:
+    # 통합 compose에서는 Linux 컨테이너에서 실패하는 MLX 기본값을 Gemini 운영 기본값으로 덮어쓴다.
+    AI_MODEL: ${AI_MODEL:-gemini_flash}
+    ACTIVE_TEXT_MODEL: ${ACTIVE_TEXT_MODEL:-gemini_flash} # Claude 사용 시 claude_sonnet + ANTHROPIC_API_KEY로 교체
+    AI_MODEL_OCR: ${AI_MODEL_OCR:-gemini-ocr}
+    AI_MODEL_ASR: ${AI_MODEL_ASR:-gemini-asr}
+    AI_MODEL_TTS: ${AI_MODEL_TTS:-gemini-tts}
+    # AI 제공자 키(GOOGLE/GEMINI/ANTHROPIC/OPENAI)는 env_file(backend-fastapi/.env)로만 주입한다.
+    # environment에서 ${VAR:-}로 주입하면 infra/.env 값이 backend-fastapi/.env를 덮어써서,
+    # backend-fastapi/.env에 넣은 새 키가 적용되지 않는다.
+    # 파이프라인 튜닝 플래그는 infra/.env 값이 있으면 그 값을 먼저 쓴다.
+    # 주의: environment가 env_file보다 우선하므로 `${VAR:-}`(빈 문자열) 기본값을 쓰면
+    # backend-fastapi/.env 값을 덮어쓴다. 기본값은 반드시 backend-fastapi/.env 현재값과 동일하게 고정한다.
+    # OPENAI_API_KEY·CLAUDE_SONNET_API_KEY 같은 시크릿도 같은 이유로 여기 넣지 않고 env_file로만 주입한다.
+    ACTIVE_PLANNER_MODEL: ${ACTIVE_PLANNER_MODEL:-gemini_flash}
+    ACTIVE_VERIFIER_MODEL: ${ACTIVE_VERIFIER_MODEL:-gemini_flash}
+    OPENAI_FALLBACK_ENABLED: ${OPENAI_FALLBACK_ENABLED:-true}
+    KANANA_POLISH_ENABLED: ${KANANA_POLISH_ENABLED:-false}
+    CHAPTERSTUDIO_PARALLEL_VERIFY: ${CHAPTERSTUDIO_PARALLEL_VERIFY:-false}
+    # Gemini 텍스트 호출 튜닝값. infra/.env 값이 있으면 먼저 쓰고, 없으면 운영 검증값을 쓴다.
+    # env_file(backend-fastapi/.env)에만 의존하면 .env 미존재 시 코드 기본값(쓰로틀 비활성·동시 4)으로
+    # 동작이 달라지므로 통합 compose에서 명시적으로 고정한다.
+    GEMINI_TEXT_MODEL: ${GEMINI_TEXT_MODEL:-gemini-3.5-flash}
+    GEMINI_TEXT_MODEL_FALLBACKS: ${GEMINI_TEXT_MODEL_FALLBACKS:-gemini-3.5-flash,gemini-3.1-flash,gemini-2.5-flash}
+    GEMINI_REQUEST_INTERVAL_MS: ${GEMINI_REQUEST_INTERVAL_MS:-2000}
+    GEMINI_TEXT_MAX_CONCURRENCY: ${GEMINI_TEXT_MAX_CONCURRENCY:-1}
+    # ExamForge 전용 Gemini 레인. 채팅·강의와 별도로 스로틀과 동시성을 둔다.
+    # 모의고사 생성이 전역 2000ms 직렬화에 밀리지 않게 분리한다. :- 기본값으로 빈 문자열 덮어쓰기를 막는다.
+    EXAMFORGE_GEMINI_CONCURRENCY: ${EXAMFORGE_GEMINI_CONCURRENCY:-3}
+    EXAMFORGE_GEMINI_INTERVAL_MS: ${EXAMFORGE_GEMINI_INTERVAL_MS:-600}
+    GEMINI_TEXT_RETRY_ATTEMPTS: ${GEMINI_TEXT_RETRY_ATTEMPTS:-5}
+    GEMINI_TEXT_RETRY_INITIAL_MS: ${GEMINI_TEXT_RETRY_INITIAL_MS:-1000}
+    GEMINI_TEXT_RETRY_MAX_MS: ${GEMINI_TEXT_RETRY_MAX_MS:-8000}
+    GEMINI_TEXT_TIMEOUT_MS: ${GEMINI_TEXT_TIMEOUT_MS:-120000}
+    TEXT_FALLBACK_AFTER_FAILURES: ${TEXT_FALLBACK_AFTER_FAILURES:-1}
+    TEXT_FALLBACK_RECOVERY_SEC: ${TEXT_FALLBACK_RECOVERY_SEC:-60}
+    EXAMFORGE_ANSWER_KEY_SECRET: ${EXAMFORGE_ANSWER_KEY_SECRET:-change_me_to_32_chars_minimum_secret}
+    DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    DATABASE_SCHEMA: ${DATABASE_SCHEMA:-chapter_studio}
+    REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+    CELERY_BROKER_URL: redis://:${REDIS_PASSWORD}@redis:6379/1
+    CELERY_RESULT_BACKEND: redis://:${REDIS_PASSWORD}@redis:6379/2
+    AGENT_JOB_REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/3
+    AGENT_JOB_STORE: ${AGENT_JOB_STORE:-redis}
+    AGENT_JOB_STORE_STRICT: ${AGENT_JOB_STORE_STRICT:-1}
+    AGENT_JOB_EXECUTOR: ${AGENT_JOB_EXECUTOR:-celery}
+    QDRANT_URL: http://qdrant:6333
+    OCR_V1_QDRANT_URL: http://qdrant:6333
+    QDRANT_API_KEY: ${QDRANT_API_KEY:-}
+    S3_ENABLED: ${S3_ENABLED:-true}
+    S3_ENDPOINT_URL: ${S3_ENDPOINT_URL:-http://minio:9000}
+    S3_REGION: ${S3_REGION:-us-east-1}
+    S3_BUCKET: ${S3_BUCKET:-sw-ez-media}
+    S3_ACCESS_KEY: ${S3_ACCESS_KEY:-minioadmin}
+    S3_SECRET_KEY: ${S3_SECRET_KEY:-minioadmin}
+    S3_PUBLIC_URL_BASE: ${S3_PUBLIC_URL_BASE:-http://localhost:9000/sw-ez-media}
+    CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost,http://localhost:3000,http://localhost:5173}
+    # Spring → FastAPI 호출 인증 키. Spring의 FASTAPI_API_KEY와 같은 값을 넣는다.
+    # 키를 켠 프로덕션에서 이 값이 빠지면 FastAPI 인증이 실패한다.
+    FASTAPI_API_KEY: ${FASTAPI_API_KEY:-}
+    # FastAPI → Spring 콜백 베이스 URL (모의고사 생성 완료/실패, 과제 채점 결과).
+    # backend-fastapi/.env의 localhost:8080은 호스트 실행용이다. 컨테이너 안에서 localhost는
+    # FastAPI 자신이므로 Connection refused가 난다. 컨테이너 네트워크 주소로 고정한다.
+    # 콜백이 도달하지 않으면 attempt가 GENERATING 상태에 머문다.
+    SPRING_BASE_URL: ${SPRING_BASE_URL:-http://sw-ez-backend-spring:8080/api}
+  restart: unless-stopped
+  networks:
+    - sw-ez-shared
+
+services:
+  # Spring Boot 메인 API
+  # backend-spring/docker-compose.yml의 spring 서비스 정의를 통합 compose에 편입한다.
+  spring:
+    build:
+      context: ../backend-spring
+      dockerfile: Dockerfile
+    image: sw-ez-team/backend-spring:local
+    container_name: sw-ez-backend-spring
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      # Lettuce는 지연 연결이라 부팅은 되지만, 콜드 기동 직후 첫 Redis 호출이 실패하지 않게 기다린다.
+      redis:
+        condition: service_healthy
+      # 음성샘플/프로필이미지 업로드가 MinIO 버킷을 쓰므로 버킷 생성·공개정책 완료 후 기동한다.
+      minio-init:
+        condition: service_completed_successfully
+    env_file:
+      - path: ../backend-spring/.env
+        required: false
+    environment:
+      SERVER_PORT: ${SERVER_PORT:-8080}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: ${SPRING_DATA_REDIS_PORT:-6379}
+      SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET:-change_me_to_at_least_32_chars_random_string}
+      APP_FASTAPI_BASE_URL: ${APP_FASTAPI_BASE_URL:-http://sw-ez-backend-fastapi-api:8082}
+      APP_CORS_ALLOWED_ORIGINS: ${CORS_ORIGINS:-http://localhost,http://localhost:3000,http://localhost:5173}
+      # Spring이 FastAPI를 호출할 때 쓰는 API 키. FastAPI의 FASTAPI_API_KEY와 같은 값이어야 한다.
+      # 키가 켜진 프로덕션 환경에서 이 항목이 빠지면 Spring의 5개 호출부가 전부 401이 된다.
+      FASTAPI_API_KEY: ${FASTAPI_API_KEY:-}
+      # 신규 모의고사 경로(20문항·유형 혼합·AI 총평·약점 연동)를 켜는 ExamGrading cutover 플래그.
+      # backend-spring/.env의 false보다 우선 적용된다(environment > env_file). 끄려면 infra/.env에서
+      # APP_EXAMGRADING_CUTOVER_ENABLED=false 로 명시한다.
+      APP_EXAMGRADING_CUTOVER_ENABLED: ${APP_EXAMGRADING_CUTOVER_ENABLED:-true}
+      # 문항 생성 타임아웃(분). FastAPI 생성 콜백이 오지 않으면 이 시간 뒤 GENERATING→FAILED로 바꾼다.
+      # FastAPI 파이프라인 타임아웃(약 12.5분)+콜백 재시도보다 길어야 한다.
+      APP_EXAMGRADING_GENERATION_TIMEOUT_MINUTES: ${APP_EXAMGRADING_GENERATION_TIMEOUT_MINUTES:-15}
+      # 개발자 데모 로그인(POST /api/auth/dev-login). 로컬 스택에서만 켠다.
+      # 프론트 버튼은 빌드 인자 VITE_DEV_LOGIN=true(infra/.env)와 쌍으로 켜진다.
+      DEV_LOGIN_ENABLED: ${DEV_LOGIN_ENABLED:-true}
+      # Spring 음성샘플/프로필이미지 업로드를 로컬 MinIO로 연결한다.
+      # environment가 env_file(backend-spring/.env)의 AWS 프로덕션 값보다 우선하므로
+      # 로컬 스택에서는 항상 MinIO 기본값이 적용된다. FastAPI의 S3_* 기본값과 동일 버킷을 쓴다.
+      AWS_S3_ENDPOINT: ${AWS_S3_ENDPOINT:-http://minio:9000}
+      AWS_S3_ACCESS_KEY: ${AWS_S3_ACCESS_KEY:-minioadmin}
+      AWS_S3_SECRET_KEY: ${AWS_S3_SECRET_KEY:-minioadmin}
+      AWS_S3_BUCKET: ${AWS_S3_BUCKET:-sw-ez-media}
+      AWS_S3_REGION: ${AWS_S3_REGION:-us-east-1}
+      # 브라우저가 재생할 공개 URL 베이스. minio-init이 이 버킷에 anonymous download 정책을 건다.
+      # 호스트에 9000 포트가 게시돼 있어 localhost:9000으로 접근 가능하다.
+      AWS_S3_PUBLIC_URL_BASE: ${AWS_S3_PUBLIC_URL_BASE:-http://localhost:9000/sw-ez-media}
+    ports:
+      - "8080:8080"
+    networks:
+      - sw-ez-shared
+    healthcheck:
+      # Spring context-path가 /api 이므로 헬스 엔드포인트는 /api/health 다 (/health 는 404)
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # FastAPI AI 서버
+  api:
+    <<: *fastapi-common
+    container_name: sw-ez-backend-fastapi-api
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8082"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      flyway:
+        condition: service_completed_successfully
+      minio-init:
+        condition: service_completed_successfully
+    ports:
+      - "8082:8082"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8082/health\")' || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # Celery 비동기 태스크 워커
+  worker:
+    <<: *fastapi-common
+    container_name: sw-ez-backend-fastapi-worker
+    command: ["celery", "-A", "app.celery_app", "worker", "-l", "info"]
+    depends_on:
+      api:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+
+  # Celery 주기적 스케줄러 (beat)
+  beat:
+    <<: *fastapi-common
+    container_name: sw-ez-backend-fastapi-beat
+    command: ["celery", "-A", "app.celery_app", "beat", "-l", "info"]
+    depends_on:
+      api:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+
+  # Nginx 리버스 프록시
+  # 프로덕션: CloudFront + Nginx(EC2)
+  # 로컬: docker nginx로 같은 라우팅 구조를 흉내 낸다
+  nginx:
+    image: nginx:1.27-bookworm
+    container_name: sw-ez-nginx
+    ports:
+      - "80:80"
+    volumes:
+      # nginx.conf 변경 시 컨테이너 재시작 없이도 reload 가능 (read-only 마운트)
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - sw-ez-shared
+    depends_on:
+      frontend-web:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+      spring:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost/nginx-health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped

@@ -1,0 +1,143 @@
+name: sw-ez-infra
+
+networks:
+  # 모든 백엔드 서비스가 공유하는 외부 브리지 네트워크. scripts/dev-up.sh가 미리 만든다
+  sw-ez-shared:
+    external: true
+
+volumes:
+  postgres-data:
+  redis-data:
+  qdrant-data:
+  minio-data:
+
+services:
+  # OLTP 메인 DB. 스키마는 Flyway 마이그레이션이 기준이다
+  postgres:
+    image: postgres:16-bookworm
+    container_name: sw-ez-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./schema/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - sw-ez-shared
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 마이그레이션 실행기. 한 번 실행하고 종료한다
+  # infra Flyway는 Spring(public) Flyway와 충돌하지 않도록 chapter_studio schema만 관리한다.
+  flyway:
+    image: flyway/flyway:10-alpine
+    container_name: sw-ez-flyway
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: >
+      -url=jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      -user=${POSTGRES_USER}
+      -password=${POSTGRES_PASSWORD}
+      -connectRetries=10
+      -schemas=chapter_studio
+      -defaultSchema=chapter_studio
+      -table=flyway_schema_history
+      -createSchemas=true
+      migrate
+    volumes:
+      - ./schema/migrations:/flyway/sql:ro
+    networks:
+      - sw-ez-shared
+
+  # 캐시와 Celery 브로커. AOF 영속성을 켠다
+  redis:
+    image: redis:7.4-bookworm
+    container_name: sw-ez-redis
+    restart: unless-stopped
+    command:
+      - redis-server
+      - --requirepass
+      - ${REDIS_PASSWORD}
+      - --appendonly
+      - "yes"
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - sw-ez-shared
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # AI 임베딩용 벡터 DB. v1.12.5로 고정한다
+  qdrant:
+    image: qdrant/qdrant:v1.12.5
+    container_name: sw-ez-qdrant
+    restart: unless-stopped
+    environment:
+      QDRANT__SERVICE__API_KEY: ${QDRANT_API_KEY}
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant-data:/qdrant/storage
+    networks:
+      - sw-ez-shared
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c ':> /dev/tcp/127.0.0.1/6333' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 음성 등 대용량 파일 테스트용 로컬 S3 호환 객체 저장소
+  minio:
+    image: minio/minio:latest
+    container_name: sw-ez-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-data:/data
+    networks:
+      - sw-ez-shared
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9000/minio/health/live || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # MinIO 최초 기동 후 미디어 버킷과 공개 읽기 정책을 만든다
+  minio-init:
+    image: minio/mc:latest
+    container_name: sw-ez-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 \"$${MINIO_ROOT_USER}\" \"$${MINIO_ROOT_PASSWORD}\" &&
+      mc mb --ignore-existing local/$${S3_BUCKET} &&
+      mc anonymous set download local/$${S3_BUCKET}
+      "
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      S3_BUCKET: ${S3_BUCKET:-sw-ez-media}
+    networks:
+      - sw-ez-shared

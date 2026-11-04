@@ -1,0 +1,97 @@
+# 비밀값과 환경 변수
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+*.p12
+*.tfstate
+*.tfstate.*
+*.tfvars
+credentials*.json
+
+# 의존성과 빌드 결과물
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+dist/
+build/
+target/
+.gradle/
+*.jar
+!backend-spring/gradle/wrapper/gradle-wrapper.jar
+*.tsbuildinfo
+
+# OS와 에디터
+.DS_Store
+.vscode/
+.idea/
+
+# 개발 도구 설정과 작업 기록
+.claude/
+.cluxion_os/
+.gstack/
+.playwright-cli/
+AGENTS.md
+CLAUDE.md
+*_handoff.md
+GROK_HANDOFF.md
+.guardian_baseline_marker
+infra/dev-tools/
+infra/docker-compose.codex.yml
+infra/nginx/nginx.codex.conf
+frontend-web/docs/task-briefs/
+portfolio-showcase/docs/task-briefs/
+backend-fastapi/app/modules/ChapterStudio_V1/docs/codex-cli-dev-test.md
+Docs/프론트엔드/
+
+# 로그, 테스트 실행 결과물, 실험용 폴더
+logs/
+*.log
+output/
+backend-fastapi/app/modules/ExamForge_V1/artifacts/
+backend-fastapi/app/modules/AI_CPU_Kanana_Nano_Q4/results/
+portfolio-showcase/qa_full.cjs
+Test_FastAPI_Module/
+Teletest/
+
+# 개인 메모, 내부 계획과 결정 기록, 운영·보안 문서
+mydocs/
+_showcase_seed/
+Docs/WBS/
+Docs/운영/
+Docs/운영보안/
+Docs/server-operations.md
+Docs/메인강의생성/변경이력_*.md
+Docs/기능/*_결정.md
+Docs/API명세서/계약결정사항.md
+lib-rust/요청사항.md
+**/docs/deployment-env-checklist.md
+**/.github/workflows/cd-*.yml
+frontend-web/docs/디자인점검_*.md
+portfolio-showcase/docs/디자인점검_*.md
+frontend-web/docs/SW디자인/
+portfolio-showcase/docs/SW디자인/
+backend-fastapi/app/modules/ExamForge_V1/spring_handoff/
+backend-fastapi/app/modules/ChapterStudio_V1/docs/spec-drift.md
+backend-fastapi/app/modules/ChapterStudio_V1/docs/phase3-production-readiness.md
+/.github/
+
+# 운영 DB와 실제 계정을 대상으로 하는 스크립트
+infra/scripts/seed_showcase_aisamdasu.py
+infra/scripts/audit_showcase_aisamdasu.py
+
+# 생성된 미디어와 실제 인물 음성
+backend-fastapi/media/
+backend-fastapi/app/modules/TTS_V2/voice_samples/
+backend-fastapi/app/modules/TTS_V2/assets/voices/
+portfolio-showcase/public/audio/
+
+# 벤치마크 실행 폴더(테스트 PDF, 모델 캐시, 가상환경)
+benchmarks/*/work/

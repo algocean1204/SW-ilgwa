@@ -1,0 +1,56 @@
+# 프로덕션 하드닝 override
+#
+# docker-compose.yml + docker-compose.local.yml 위에 얹는다.
+# 개발 compose의 기본값(ENVIRONMENT=development, 와일드카드 CORS 등)을
+# 프로덕션 값으로 덮어쓴다.
+#
+# 사용법:
+#   docker compose \
+#     -f docker-compose.yml \
+#     -f docker-compose.local.yml \
+#     -f docker-compose.prod.yml \
+#     --env-file .env.production \
+#     up -d
+#
+# 주의:
+#   - .env.production에 FASTAPI_API_KEY(32자 이상), CORS_ORIGINS(실 도메인),
+#     ENVIRONMENT=production 이 반드시 설정되어 있어야 한다.
+#   - 단독으로 실행하지 않고, 위 두 compose 파일을 먼저 지정한다.
+
+name: sw-ez-local
+
+services:
+  # FastAPI API 서버를 프로덕션 환경으로 고정한다
+  api:
+    environment:
+      ENVIRONMENT: production
+      APP_ENV: production
+      # Spring → FastAPI 인증 키: .env.production의 FASTAPI_API_KEY를 주입한다.
+      # 개발 compose의 빈 기본값(:-)을 덮어써 키 인증을 켠다.
+      FASTAPI_API_KEY: ${FASTAPI_API_KEY}
+      # 실제 프론트 도메인만 허용하고 와일드카드(*)는 쓰지 않는다
+      CORS_ORIGINS: ${CORS_ORIGINS}
+
+  # Celery 워커를 프로덕션 환경으로 고정한다
+  worker:
+    environment:
+      ENVIRONMENT: production
+      APP_ENV: production
+      FASTAPI_API_KEY: ${FASTAPI_API_KEY}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+
+  # Celery beat 스케줄러를 프로덕션 환경으로 고정한다
+  beat:
+    environment:
+      ENVIRONMENT: production
+      APP_ENV: production
+      FASTAPI_API_KEY: ${FASTAPI_API_KEY}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+
+  # Spring Boot를 프로덕션 환경으로 고정하고 FastAPI 키를 주입한다
+  spring:
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      # Spring이 FastAPI를 호출할 때 쓰는 인증 키. FastAPI의 FASTAPI_API_KEY와 같은 값이다
+      FASTAPI_API_KEY: ${FASTAPI_API_KEY}
+      APP_CORS_ALLOWED_ORIGINS: ${CORS_ORIGINS}

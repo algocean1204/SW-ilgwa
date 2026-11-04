@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+  <!-- local/default/dev: 텍스트 패턴. userId는 대괄호 없이 줄 끝에 둔다 -->
+  <springProfile name="local | default | dev">
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+      <encoder>
+        <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] [%X{traceId:-no-trace}] %logger{36} - %msg | userId=%X{userId:-anonymous}%replace( errorCode=%X{errorCode:-}){' errorCode=$', ''}%n</pattern>
+        <charset>UTF-8</charset>
+      </encoder>
+    </appender>
+
+    <root level="${LOG_LEVEL_ROOT:-INFO}">
+      <appender-ref ref="CONSOLE"/>
+    </root>
+    <logger name="com.swez.backend" level="${LOG_LEVEL_APP:-INFO}"/>
+    <logger name="org.springframework.web" level="${LOG_LEVEL_SPRING_WEB:-INFO}"/>
+  </springProfile>
+
+  <!-- prod: JSON 구조화 로그 -->
+  <springProfile name="prod">
+    <appender name="CONSOLE_JSON" class="ch.qos.logback.core.ConsoleAppender">
+      <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+        <includeMdcKeyName>traceId</includeMdcKeyName>
+        <includeMdcKeyName>userId</includeMdcKeyName>
+        <includeMdcKeyName>method</includeMdcKeyName>
+        <includeMdcKeyName>path</includeMdcKeyName>
+        <includeMdcKeyName>errorCode</includeMdcKeyName>
+      </encoder>
+    </appender>
+
+    <root level="${LOG_LEVEL_ROOT:-INFO}">
+      <appender-ref ref="CONSOLE_JSON"/>
+    </root>
+    <logger name="com.swez.backend" level="${LOG_LEVEL_APP:-INFO}"/>
+    <logger name="org.springframework.web" level="${LOG_LEVEL_SPRING_WEB:-INFO}"/>
+  </springProfile>
+
+</configuration>

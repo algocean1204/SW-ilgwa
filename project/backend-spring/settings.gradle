@@ -1,0 +1,2 @@
+// 루트 프로젝트 이름. Docker 이미지 태그와 JAR 파일명의 기준이다
+rootProject.name = 'backend-spring'

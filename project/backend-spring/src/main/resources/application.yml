@@ -1,0 +1,132 @@
+# 서버 포트: 기본값은 8080이고 .env의 SERVER_PORT 환경변수로 바꿀 수 있다
+server:
+  port: ${SERVER_PORT:8080}
+  servlet:
+    # 모든 API 엔드포인트에 /api prefix를 부여한다
+    context-path: /api
+
+spring:
+  application:
+    name: backend-spring
+  servlet:
+    multipart:
+      max-file-size: ${APP_MULTIPART_MAX_FILE_SIZE:100MB}
+      max-request-size: ${APP_MULTIPART_MAX_REQUEST_SIZE:100MB}
+  web:
+    resources:
+      # REST API 전용 서버라 정적 리소스 기본 핸들러를 끈다
+      # Swagger UI는 springdoc 자체 핸들러로 서빙되므로 영향이 없다
+      add-mappings: false
+
+  # PostgreSQL: infra 레포 docker-compose의 postgres 서비스에 연결한다
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  # JPA: DDL은 Flyway가 관리하므로 Hibernate는 validate만 한다
+  jpa:
+    hibernate:
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:validate}
+    open-in-view: false
+    show-sql: ${SPRING_JPA_SHOW_SQL:false}
+    properties:
+      hibernate:
+        format_sql: true
+
+  # Redis: 세션/캐시 저장소. infra 레포 docker-compose의 redis 서비스에 연결한다
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      password: ${SPRING_DATA_REDIS_PASSWORD}
+
+  # Flyway: classpath:db/migration 스크립트를 버전 순으로 실행한다
+  # 첫 기동 때 flyway_schema_history 테이블을 자동으로 만든다 (baseline-on-migrate)
+  flyway:
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+
+app:
+  # CORS: 기본값은 웹 프론트(React/Next.js, Vite) 로컬 포트다. 운영은 환경변수로 바꾼다
+  cors:
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}
+  # JWT: 기본값은 액세스 토큰 30분, 리프레시 토큰 14일이다
+  jwt:
+    secret: ${JWT_SECRET}
+    access-expiry-ms: ${JWT_ACCESS_EXPIRY_MS:1800000}
+    refresh-expiry-ms: ${JWT_REFRESH_EXPIRY_MS:1209600000}
+  # Auth Cookie: secure/sameSite/domain은 환경별로 설정한다 (로컬 HTTP는 secure=false)
+  auth:
+    cookie:
+      secure: ${AUTH_COOKIE_SECURE:true}
+      same-site: ${AUTH_COOKIE_SAME_SITE:Strict}
+      domain: ${AUTH_COOKIE_DOMAIN:}
+  # Dev Login: OAuth client ID가 없는 로컬 데모에서만 true로 켠다
+  dev-login:
+    enabled: ${DEV_LOGIN_ENABLED:false}
+  # OAuth: Google ID Token 검증과 Kakao Authorization Code Flow
+  oauth:
+    google:
+      client-id: ${GOOGLE_CLIENT_ID:}
+    kakao:
+      client-id: ${KAKAO_CLIENT_ID:}
+      client-secret: ${KAKAO_CLIENT_SECRET:}
+      redirect-uri: ${KAKAO_REDIRECT_URI:}
+  # S3: 음성 샘플 파일 업로드 저장소
+  s3:
+    bucket: ${AWS_S3_BUCKET:}
+    region: ${AWS_S3_REGION:ap-northeast-2}
+    access-key: ${AWS_S3_ACCESS_KEY:}
+    secret-key: ${AWS_S3_SECRET_KEY:}
+    endpoint: ${AWS_S3_ENDPOINT:}
+    # 브라우저가 접근할 공개 URL 베이스 (MinIO 등 path-style 스토리지용). 비면 AWS 가상호스트 URL을 쓴다
+    public-url-base: ${AWS_S3_PUBLIC_URL_BASE:}
+  # Internal API: FastAPI → Spring 내부 통신 인증 토큰
+  internal:
+    token: ${APP_INTERNAL_TOKEN:local-dev-token}
+  # FastAPI: AI 추론 서버 베이스 URL (튜터 미리보기, ExamForge 채점 등 AI 기능 호출에 쓴다)
+  # ExamForge RestClient(examForgeRestClient 빈)도 이 값을 그대로 쓴다
+  fastapi:
+    base-url: ${APP_FASTAPI_BASE_URL:http://localhost:8000}
+    # FastAPI ApiKeyMiddleware 인증 키. FastAPI 측 FASTAPI_API_KEY와 같은 시크릿이다. 비면 헤더를 붙이지 않는다(개발용)
+    # ExamForgeRestClientConfig의 @ConditionalOnProperty가 이 값을 보므로 app.fastapi 블록 안에 있어야 한다
+    api-key: ${FASTAPI_API_KEY:}
+  # 커리큘럼 생성: FastAPI 백그라운드 태스크가 DB 연결 불가 등으로 FAILED를 기록하지 못했을 때
+  # Spring 스케줄러(CurriculumTimeoutScheduler)가 이 시간 이후에도 GENERATING인 코스를 FAILED로 전이한다
+  curriculum:
+    timeout-minutes: ${APP_CURRICULUM_TIMEOUT_MINUTES:10}
+  # ExamForge 채점: answer_key_seal 무결성 검증용 시크릿 (FastAPI가 seal을 만들 때 쓴 키와 같다)
+  # Spring은 seal을 DB에 저장하고 FastAPI로 넘기기만 하며, 검증은 FastAPI가 한다
+  # 시크릿값은 .env에서만 관리하고 코드·문서에 하드코딩하지 않는다
+  examgrading:
+    answer-key-secret: ${EXAMFORGE_ANSWER_KEY_SECRET:}
+    # 문항 생성 타임아웃: FastAPI 생성 콜백이 이 시간 이후에도 도착하지 않으면
+    # Spring 스케줄러(ExamAttemptTimeoutScheduler)가 GENERATING 응시를 FAILED로 전이한다.
+    # 기본 15분: FastAPI 파이프라인 타임아웃(MOCK_EXAM_PIPELINE_TIMEOUT_SEC 기본 750초=12.5분)
+    # + 콜백 재시도(~15초)보다 길어야 정상 완료 직전 응시를 잘못 FAILED 처리하지 않는다
+    generation-timeout-minutes: ${APP_EXAMGRADING_GENERATION_TIMEOUT_MINUTES:15}
+    # cutover 플래그: true이면 MockExamService의 생성·제출·상세조회를 examgrading 경로로 위임한다
+    # 기본값 false는 레거시 MCQ 경로를 쓴다. 운영 전환 때 환경변수로 true를 준다
+    cutover:
+      enabled: ${APP_EXAMGRADING_CUTOVER_ENABLED:false}
+  # 토스페이먼츠: 결제 승인/취소 API 연동
+  # 다른 secret처럼 키는 코드에 두지 않고 환경변수로만 주입한다. 주입하지 않으면 결제가 꺼진다
+  toss:
+    client-key: ${TOSS_CLIENT_KEY:}
+    secret-key: ${TOSS_SECRET_KEY:}
+    base-url: ${TOSS_BASE_URL:https://api.tosspayments.com}
+  # Telegram: 관리자 봇 credential 암호화와 Telegram Bot API 헬스체크
+  telegram:
+    credential-secret: ${TELEGRAM_CREDENTIAL_SECRET:${JWT_SECRET:local-dev-telegram-secret}}
+    api-base-url: ${TELEGRAM_API_BASE_URL:https://api.telegram.org}
+    webhook-secret: ${TELEGRAM_WEBHOOK_SECRET:}
+
+swagger:
+  title: EZ TEAM API
+  description: EZ TEAM 백엔드 API 명세서
+  version: v1.0.0
+  server:
+    url: http://localhost:8080/api
+    description: 로컬 개발 서버

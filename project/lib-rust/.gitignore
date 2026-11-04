@@ -1,0 +1,35 @@
+# Cargo 빌드 결과물
+target/
+**/*.rs.bk
+
+# Cargo 락 파일은 보통 라이브러리면 무시하고 바이너리면 커밋한다
+# 이 저장소는 Cargo.lock을 커밋한다
+# Cargo.lock
+
+# 백업
+*.bk
+*.swp
+*.swo
+
+# 환경 변수
+.env
+.env.*
+!.env.example
+
+# 에디터
+.vscode/
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 디버그
+*.pdb
+
+# mdBook
+book/
+
+# 로컬 에디터·도구 세션 설정은 공유하지 않는다
+.claude/

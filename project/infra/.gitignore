@@ -1,0 +1,40 @@
+.env
+.env.*
+!.env.example
+!.env.production.example
+
+postgres-data/
+redis-data/
+qdrant-data/
+
+*.log
+logs/
+
+.DS_Store
+Thumbs.db
+
+docker-compose.override.yml
+
+.idea/
+.vscode/
+
+# Database backups/dumps (sensitive data)
+*.sql
+!schema/migrations/*.sql
+!schema/init/*.sql
+*.sql.gz
+*.dump
+dump.rdb
+
+# Terraform
+*.tfstate
+*.tfstate.backup
+.terraform/
+terraform.tfvars
+
+# Kubernetes
+*.kubeconfig
+kubeconfig
+
+# 로컬 에디터·도구 세션 설정은 공유하지 않는다
+.claude/

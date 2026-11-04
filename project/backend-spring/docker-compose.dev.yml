@@ -1,0 +1,44 @@
+name: ezteam-spring
+
+services:
+  spring:
+    image: "${DOCKER_USERNAME:?DOCKER_USERNAME is required}/${DOCKER_REPO:?DOCKER_REPO is required}:${DOCKER_TAG:-dev-latest}"
+    container_name: ezteam-spring
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      SERVER_PORT: 8080
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      # Redis는 docker-compose.redis.yml이 띄운 ezteam-redis 컨테이너를 쓴다
+      SPRING_DATA_REDIS_HOST: ezteam-redis
+      SPRING_DATA_REDIS_PORT: 6379
+      TZ: Asia/Seoul
+      JAVA_OPTS: >-
+        -Xms256m -Xmx512m
+        -XX:+UseG1GC
+        -XX:MaxGCPauseMillis=200
+        -Dfile.encoding=UTF-8
+        -Duser.timezone=Asia/Seoul
+    ports:
+      - "127.0.0.1:8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    mem_limit: 768m
+    cpus: 0.8
+    networks:
+      - ezteam-shared
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  # docker-compose.redis.yml 이 생성하는 외부 네트워크를 공유한다
+  ezteam-shared:
+    external: true

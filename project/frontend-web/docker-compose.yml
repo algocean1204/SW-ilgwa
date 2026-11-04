@@ -1,0 +1,39 @@
+# frontend-web 로컬 개발용 compose
+# 사전 조건: infra 레포의 scripts/dev-up.sh로 sw-ez-shared 네트워크를 먼저 만든다.
+
+name: sw-ez-frontend
+
+networks:
+  # 모든 백엔드 서비스가 공유하는 외부 브리지 네트워크
+  sw-ez-shared:
+    external: true
+
+services:
+  frontend-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # Vite는 빌드 시점에 env 값을 번들에 주입한다. 런타임 환경변수가 아니다.
+      args:
+        VITE_API_BASE_SPRING: ${VITE_API_BASE_SPRING:-}
+        VITE_API_BASE_FASTAPI: ${VITE_API_BASE_FASTAPI:-}
+        VITE_API_BASE_RUST: ${VITE_API_BASE_RUST:-}
+        VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID:-}
+        VITE_KAKAO_CLIENT_ID: ${VITE_KAKAO_CLIENT_ID:-}
+        VITE_KAKAO_REDIRECT_URI: ${VITE_KAKAO_REDIRECT_URI:-}
+        VITE_DEV_LOGIN: ${VITE_DEV_LOGIN:-}
+    image: sw-ez-team/frontend-web:local
+    container_name: sw-ez-frontend-web
+    # 포트 3000으로 직접 접속하거나 infra/docker-compose.local.yml의 nginx 프록시를 거친다.
+    ports:
+      - "3000:3000"
+    networks:
+      - sw-ez-shared
+    healthcheck:
+      # curl은 nginx:alpine 기본 이미지에 들어 있다.
+      test: ["CMD-SHELL", "curl -sf http://localhost:3000/ || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped

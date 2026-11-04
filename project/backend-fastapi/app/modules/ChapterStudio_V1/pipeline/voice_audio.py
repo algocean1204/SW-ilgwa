@@ -1,0 +1,224 @@
+from __future__ import annotations
+
+import asyncio
+import logging
+from pathlib import Path
+from time import time
+from uuid import uuid4
+
+import httpx
+from ai_connectors.registry import get_tts_connector as get_root_tts_connector
+from ai_connectors.tts_schemas import TTSRequest, TTSResponse
+
+from app.modules.ObjectStorage_V1 import (
+    ObjectStorageConfigError, ObjectStorageUploadError, put_object, s3_enabled, to_internal_url
+)
+from app.modules.ChapterStudio_V1.ai_connectors.base import TTSConnector
+from app.modules.ChapterStudio_V1.ai_connectors.registry import get_tts_connector
+from app.modules.ChapterStudio_V1.common.config import (
+    tts_media_url,
+    tts_output_dir,
+    tts_selective_tilde_enabled,
+    tts_synth_concurrency,
+)
+from app.modules.ChapterStudio_V1.common.errors import ConversionError
+from app.modules.ChapterStudio_V1.pipeline.state import StateRecord, StateRecords
+from app.modules.ChapterStudio_V1.pipeline.tts_routing import (
+    TutorVoiceProfile,
+    TtsPlan,
+    resolve_tts_fallback_chain,
+    resolve_tts_plan,
+)
+from app.modules.ChapterStudio_V1.postprocess.voice_text import apply_selective_tilde
+
+_LOG = logging.getLogger(__name__)
+_REF_DOWNLOAD_TIMEOUT_SEC = 10.0
+
+
+async def synthesize_voice_audio(
+    voice_scripts: StateRecords,
+    connector: TTSConnector | None = None,
+    *,
+    voice: str = "f1",
+    max_concurrency: int | None = None,
+    tutor_profile: TutorVoiceProfile | None = None,
+) -> StateRecords:
+    """슬라이드별 음성대본을 TTS 오디오 파일 레코드로 변환한다."""
+    resolved_concurrency = tts_synth_concurrency() if max_concurrency is None else max_concurrency
+    if resolved_concurrency < 1:
+        raise ConversionError("max_concurrency는 1 이상이어야 한다.")
+    if tutor_profile is not None:
+        return await _synthesize_with_tutor_profile(voice_scripts, tutor_profile, resolved_concurrency)
+    tts = connector or get_tts_connector()
+    semaphore = asyncio.Semaphore(resolved_concurrency)
+    tasks = [_synthesize_one(record, tts, voice, semaphore) for record in voice_scripts]
+    results = await asyncio.gather(*tasks)
+    return sorted(results, key=lambda record: _record_int(record, "slide_idx"))
+
+
+async def warmup_tutor_voice_audio(
+    tutor_profile: TutorVoiceProfile,
+    text: str = "안녕하세요",
+) -> None:
+    """대량 합성 전에 선택된 튜터 TTS 엔진을 짧은 문장으로 깨운다."""
+    plan = resolve_tts_plan(tutor_profile)
+    await _synthesize_by_plan(text, plan)
+
+
+async def _synthesize_one(
+    record: StateRecord,
+    connector: TTSConnector,
+    voice: str,
+    semaphore: asyncio.Semaphore,
+) -> StateRecord:
+    slide_idx = _record_int(record, "slide_idx")
+    script_text = _record_text(record, "script_text")
+    synthesis_text = _synthesis_script_text(script_text)
+    async with semaphore:
+        payload = await connector.synthesize(synthesis_text, voice=voice)
+    audio_url = payload.get("audio_url")
+    duration_sec = payload.get("duration_sec")
+    if not isinstance(audio_url, str) or audio_url == "":
+        raise ConversionError("TTS 결과 audio_url 문자열이 필요하다.")
+    if not isinstance(duration_sec, int | float) or duration_sec <= 0:
+        raise ConversionError("TTS 결과 duration_sec 양수가 필요하다.")
+    return {
+        "slide_idx": slide_idx,
+        "script_text": script_text,
+        "audio_url": audio_url,
+        "duration_hint_sec": float(duration_sec),
+        "voice": voice,
+    }
+
+
+async def _synthesize_with_tutor_profile(
+    voice_scripts: StateRecords,
+    tutor_profile: TutorVoiceProfile,
+    max_concurrency: int,
+) -> StateRecords:
+    semaphore = asyncio.Semaphore(max_concurrency)
+    tasks = [_synthesize_one_routed(record, tutor_profile, semaphore) for record in voice_scripts]
+    results = await asyncio.gather(*tasks)
+    return sorted(results, key=lambda record: _record_int(record, "slide_idx"))
+
+
+async def _synthesize_one_routed(
+    record: StateRecord,
+    tutor_profile: TutorVoiceProfile,
+    semaphore: asyncio.Semaphore,
+) -> StateRecord:
+    slide_idx = _record_int(record, "slide_idx")
+    script_text = _record_text(record, "script_text")
+    chain = resolve_tts_fallback_chain(tutor_profile)
+    async with semaphore:
+        response, used_plan = await _synthesize_with_fallback_chain(script_text, chain)
+    return {
+        "slide_idx": slide_idx,
+        "script_text": script_text,
+        "audio_url": await _save_audio_bytes(response.audio_bytes, slide_idx, used_plan.engine),
+        "duration_hint_sec": float(response.duration_sec),
+        "voice": used_plan.engine,
+    }
+
+
+async def _synthesize_with_fallback_chain(
+    script_text: str,
+    chain: list[TtsPlan],
+) -> tuple[TTSResponse, TtsPlan]:
+    """엔진 체인을 순서대로 시도하고 첫 성공 응답을 반환한다."""
+    last_exc: Exception | None = None
+    for index, candidate in enumerate(chain):
+        try:
+            return await _synthesize_by_plan(script_text, candidate), candidate
+        except Exception as exc:
+            last_exc = exc
+            if index < len(chain) - 1:
+                _LOG.warning(
+                    "튜터 TTS 합성 실패 — 다음 엔진으로 폴백합니다. engine=%s, error=%s",
+                    candidate.engine,
+                    exc,
+                )
+                continue
+            raise
+    raise ConversionError(f"TTS 엔진 체인이 비어 있습니다: {last_exc}")
+
+
+async def _synthesize_by_plan(script_text: str, plan: TtsPlan) -> TTSResponse:
+    connector = get_root_tts_connector(plan.engine)
+    synthesis_text = _synthesis_script_text(script_text)
+    if plan.engine == "qwen3-tts-modal":
+        if not plan.ref_source.strip():
+            raise ConversionError("Modal TTS는 참조 음성(ref_source)이 필요합니다.")
+        ref_audio = await _load_ref_audio(plan.ref_source)
+        request = TTSRequest(text=synthesis_text, ref_audio_bytes=ref_audio)
+        return await connector.synthesize(request)
+    request = TTSRequest(text=synthesis_text, ref_audio_bytes=b"", style=plan.style)
+    return await connector.synthesize(request)
+
+
+async def _load_ref_audio(ref_source: str) -> bytes:
+    if ref_source.startswith(("http://", "https://")):
+        # 브라우저용 공개 URL(예: http://localhost:9000/...)은 컨테이너 안에서 닿지 않으므로
+        # S3 설정 기준 내부 endpoint URL(예: http://minio:9000/...)로 변환해 다운로드한다.
+        resolved = to_internal_url(ref_source)
+        async with httpx.AsyncClient(timeout=_REF_DOWNLOAD_TIMEOUT_SEC) as client:
+            response = await client.get(resolved)
+            response.raise_for_status()
+            return response.content
+    return Path(ref_source).expanduser().read_bytes()
+
+
+async def _save_audio_bytes(audio_bytes: bytes, slide_idx: int, engine: str) -> str:
+    filename = _audio_filename(slide_idx, engine)
+    if s3_enabled():
+        return await _save_audio_to_s3(audio_bytes, filename)
+    return _save_audio_to_local(audio_bytes, filename)
+
+
+async def _save_audio_to_s3(audio_bytes: bytes, filename: str) -> str:
+    key = f"tts/{filename}"
+    try:
+        return await put_object(audio_bytes, key=key, content_type="audio/wav")
+    except (ObjectStorageConfigError, ObjectStorageUploadError) as exc:
+        raise ConversionError(f"TTS 오디오 S3 저장 실패: {exc}") from exc
+
+
+def _save_audio_to_local(audio_bytes: bytes, filename: str) -> str:
+    output_dir = tts_output_dir()
+    output_dir.mkdir(parents=True, exist_ok=True)
+    path = output_dir / filename
+    path.write_bytes(audio_bytes)
+    return tts_media_url(filename)
+
+
+def _audio_filename(slide_idx: int, engine: str) -> str:
+    return f"{int(time() * 1000)}_{slide_idx}_{_safe_token(engine)}_{uuid4().hex[:8]}.wav"
+
+
+def _synthesis_script_text(script_text: str) -> str:
+    """DB 저장값은 그대로 두고 합성 입력에만 말투 후처리를 적용한다."""
+    if not tts_selective_tilde_enabled():
+        return script_text
+    return apply_selective_tilde(script_text)
+
+
+def _safe_token(value: str) -> str:
+    token = "".join(char for char in value if char.isalnum() or char in {"-", "_"})
+    return token[:32] or "tts"
+
+
+def _record_text(record: StateRecord, key: str) -> str:
+    value = record.get(key)
+    if not isinstance(value, str) or value == "":
+        raise ConversionError(f"{key} 문자열이 필요하다.")
+    return value
+
+
+def _record_int(record: StateRecord, key: str) -> int:
+    value = record.get(key)
+    if not isinstance(value, int):
+        raise ConversionError(f"{key} 정수가 필요하다.")
+    return value
+
+
+__all__ = ["synthesize_voice_audio", "warmup_tutor_voice_audio"]

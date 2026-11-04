@@ -1,0 +1,220 @@
+"""병렬 2차 내용 검증 + 병렬 교정 (최대 2라운드).
+
+content_verify.py(직렬 1회)의 병렬·다라운드판이다. 슬라이드·퀴즈·음성 세 그룹을 동시에
+검증(asyncio.gather)하고, 이슈가 있는 그룹만 동시에 교정한다. 교정 후 재검증해 잔존 오류가
+있으면 최대 CHAPTERSTUDIO_VERIFY_MAX_ROUNDS(기본 2)까지만 반복한다.
+
+길이 게이트: voice_script가 900자(CHAPTERSTUDIO_VOICE_MIN_CHARS) 미만이면 LLM 판단 없이
+len()으로 확장 교정 대상에 넣는다. xgrammar가 minLength를 강제하지 못하는 것이 실측됐다.
+
+설계 원칙:
+    - 검증/교정이 실패하면 원본을 유지하고(graceful) 예외를 올리지 않는다.
+    - return_exceptions로 그룹별 예외를 받아 한 그룹 실패가 전체로 번지지 않게 한다.
+    - 교정 병합이 slide_idx 계약을 깨면 원본으로 되돌린다(다운스트림 계약 불변).
+    - 길이와 구조를 지킨 출력은 게이트를 통과해 no-op이다.
+
+공개 API:
+    - verify_and_correct_parallel(connector, payload, slide_count) -> GeneratedLessonPayload
+"""
+from __future__ import annotations
+
+import asyncio
+import json
+
+from pydantic import ValidationError
+
+from app.modules.ChapterStudio_V1.ai_connectors.base import AIConnector
+from app.modules.ChapterStudio_V1.ai_connectors.schemas import ChapterAIRequest
+from app.modules.ChapterStudio_V1.common.config import (
+    verify_max_rounds,
+    voice_length_gate_enabled,
+    voice_min_chars,
+)
+from app.modules.ChapterStudio_V1.common.logging import logger
+from app.modules.ChapterStudio_V1.pipeline.content_verify_merge import (
+    apply_corrections,
+    combine_corrections,
+    indices_intact,
+    parse_correction,
+    parse_errors,
+)
+from app.modules.ChapterStudio_V1.pipeline.content_verify_prompts import (
+    correct_system,
+    correct_user_group,
+    verify_system,
+    verify_user_group,
+)
+from app.modules.ChapterStudio_V1.pipeline.payload import GeneratedLessonPayload
+from app.modules.ChapterStudio_V1.pipeline.voice_length_gate import length_gate_errors
+from app.modules.ChapterStudio_V1.pipeline.voice_structure_gate import structure_gate_errors
+
+# 검증/교정 토큰 상한(content_verify.py와 같은 기준). gemini-3.5-flash는 thinking 토큰(~21000)이 출력 예산을 먼저 쓴다.
+# 8000/16000이면 오류 목록·교정 JSON이 MAX_TOKENS로 잘려 그룹 교정이 실패했다.
+# thinking 몫을 더해 verify=32000, correct=40000으로 둔다(한도 65536 이내).
+_VERIFY_MAX_TOKENS = 32000
+_CORRECT_MAX_TOKENS = 40000
+# 동시에 검증·교정하는 컴포넌트 그룹.
+_GROUPS = ("slides", "quizzes", "voice")
+
+
+async def verify_and_correct_parallel(
+    connector: AIConnector,
+    payload: GeneratedLessonPayload,
+    slide_count: int,
+) -> GeneratedLessonPayload:
+    """그룹별 병렬 검증→병렬 교정을 최대 max_rounds 반복해 교정된 payload를 반환한다.
+
+    각 라운드는 LLM 병렬 검증(3그룹 동시), voice 길이·구조 게이트 오류 추가, 오류 그룹만
+    병렬 교정, 재검증(다음 라운드 입력) 순이다. max_rounds 뒤에도 오류가 남으면 경고만 한다.
+    """
+    max_r = verify_max_rounds()
+    current = payload
+    for round_num in range(1, max_r + 1):
+        errors = await _collect_errors(connector, current)
+        if not errors:
+            return current
+        logger.warning(
+            "parallel_verify: 라운드 {}/{} 오류 {}건 검출 → 병렬 교정",
+            round_num, max_r, len(errors),
+        )
+        corrected = await _correct_all_groups(connector, current, errors, slide_count)
+        if corrected is current:
+            # 교정 자체가 실패하면 반복해도 소용없어 현재 상태를 유지한다.
+            return current
+        current = corrected
+    # max_rounds 뒤 남은 오류는 경고만 하고 교정하지 않는다.
+    remaining = await _collect_errors(connector, current)
+    if remaining:
+        logger.warning("parallel_verify: {}라운드 후에도 오류 {}건 잔존(추가 교정은 하지 않는다)", max_r, len(remaining))
+    return current
+
+
+async def _collect_errors(
+    connector: AIConnector, payload: GeneratedLessonPayload
+) -> list[dict[str, object]]:
+    """LLM 병렬 검증 오류 + 결정적 voice 구조·길이 게이트 오류를 합산한다."""
+    llm_errors = await _verify_all_groups(connector, payload)
+    # 구조 게이트(섹션 4개·role 완전집합·순서·intro 모드)는 LLM 없이 코드로 검사한다.
+    struct_errors = structure_gate_errors(payload)
+    if struct_errors:
+        existing_voice_idx = {
+            err.get("slide_idx")
+            for err in llm_errors
+            if str(err.get("field", "")) == "voice"
+        }
+        new_struct = [e for e in struct_errors if e.get("slide_idx") not in existing_voice_idx]
+        if new_struct:
+            logger.warning("parallel_verify: voice 구조 게이트 {}건 추가", len(new_struct))
+        llm_errors = llm_errors + new_struct
+    if not voice_length_gate_enabled():
+        return llm_errors
+    gate_errors = length_gate_errors(payload, voice_min_chars())
+    if gate_errors:
+        existing_voice_idx = {
+            err.get("slide_idx")
+            for err in llm_errors
+            if str(err.get("field", "")) == "voice"
+        }
+        # 이미 잡은 인덱스는 다시 넣지 않아 교정 지시가 겹치지 않게 한다.
+        new_gate = [e for e in gate_errors if e.get("slide_idx") not in existing_voice_idx]
+        if new_gate:
+            logger.warning("parallel_verify: voice 길이 게이트 {}건 추가(LLM 미검출 미달 항목)", len(new_gate))
+        return llm_errors + new_gate
+    return llm_errors
+
+
+async def _verify_all_groups(
+    connector: AIConnector, payload: GeneratedLessonPayload
+) -> list[dict[str, object]]:
+    """슬라이드·퀴즈·음성을 동시에 검증하고 오류를 모은다(그룹 실패는 graceful)."""
+    results = await asyncio.gather(
+        *[_verify_group(connector, payload, group) for group in _GROUPS],
+        return_exceptions=True,
+    )
+    errors: list[dict[str, object]] = []
+    for group, result in zip(_GROUPS, results, strict=True):
+        if isinstance(result, BaseException):
+            logger.warning("parallel_verify: 그룹({}) 검증 실패 → 무시(graceful): {}", group, result)
+            continue
+        errors.extend(result)
+    return errors
+
+
+async def _verify_group(
+    connector: AIConnector, payload: GeneratedLessonPayload, group: str
+) -> list[dict[str, object]]:
+    """한 그룹 검증 1회. 응답이 깨지면 빈 목록(graceful)."""
+    request = ChapterAIRequest(
+        system=verify_system(),
+        user=verify_user_group(payload, group),
+        max_tokens=_VERIFY_MAX_TOKENS,
+        temperature=0.0,
+        extra={"schema": "content_verify", "content_verify": True},
+    )
+    try:
+        response = await connector.generate(request)
+        return parse_errors(response.text)
+    except (ValueError, ValidationError, json.JSONDecodeError) as exc:
+        logger.warning("parallel_verify: 그룹({}) 응답 파싱 실패 → 빈 목록({})", group, exc)
+        return []
+
+
+async def _correct_all_groups(
+    connector: AIConnector,
+    payload: GeneratedLessonPayload,
+    errors: list[dict[str, object]],
+    slide_count: int,
+) -> GeneratedLessonPayload:
+    """이슈가 있는 그룹만 동시에 교정해 병합한다(인덱스 깨지면 원본 유지)."""
+    affected = _affected_groups(errors)
+    if not affected:
+        return payload
+    results = await asyncio.gather(
+        *[_correct_group(connector, payload, errors, group) for group in affected],
+        return_exceptions=True,
+    )
+    partials = []
+    for group, result in zip(affected, results, strict=True):
+        if isinstance(result, BaseException) or result is None:
+            logger.warning("parallel_verify: 그룹({}) 교정 실패 → 해당 그룹은 원본 유지", group)
+            continue
+        partials.append(result)
+    if not partials:
+        return payload
+    merged = apply_corrections(payload, combine_corrections(partials))
+    if not indices_intact(merged, slide_count):
+        logger.warning("parallel_verify: 교정 병합이 인덱스 계약을 깨뜨려 원본으로 되돌린다")
+        return payload
+    return merged
+
+
+async def _correct_group(
+    connector: AIConnector,
+    payload: GeneratedLessonPayload,
+    errors: list[dict[str, object]],
+    group: str,
+):
+    """한 그룹 교정 1회. 응답이 깨지면 None(graceful)."""
+    request = ChapterAIRequest(
+        system=correct_system(),
+        user=correct_user_group(payload, errors, group),
+        max_tokens=_CORRECT_MAX_TOKENS,
+        temperature=0.1,
+        extra={"schema": "content_correct", "content_correct": True},
+    )
+    try:
+        response = await connector.generate(request)
+        return parse_correction(response.text)
+    except (ValueError, ValidationError, json.JSONDecodeError) as exc:
+        logger.warning("parallel_verify: 그룹({}) 교정 응답 파싱 실패({})", group, exc)
+        return None
+
+
+def _affected_groups(errors: list[dict[str, object]]) -> list[str]:
+    """오류가 보고된 그룹만 골라낸다(field=slide/quiz/voice → 그룹명)."""
+    fields = {str(err.get("field", "")) for err in errors}
+    mapping = {"slide": "slides", "quiz": "quizzes", "voice": "voice"}
+    return [group for field, group in mapping.items() if field in fields]
+
+
+__all__ = ["verify_and_correct_parallel"]

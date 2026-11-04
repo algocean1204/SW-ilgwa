@@ -1,0 +1,130 @@
+"""ExamForge 파이프라인 상태."""
+from __future__ import annotations
+
+from typing import NotRequired, TypedDict
+
+
+class ValidationResult(TypedDict):
+    """개별 문제 검증 결과."""
+
+    question_id: str
+    passed: bool
+    issues: list[str]
+    # validate_node가 항상 채우지는 않아 선택 필드로 둔다
+    fix_instructions: NotRequired[str]
+    retry_count: NotRequired[int]
+    parse_failed: NotRequired[bool]
+
+
+class ValidationReport(TypedDict):
+    """전체 검증 보고서."""
+
+    results: list[ValidationResult]
+    global_issues: list[str]
+    coverage_score: float
+    dedup_score: float
+    answer_accuracy_rate: float
+    answer_verification_parse_failed_count: NotRequired[int]
+    answer_verification_parse_failed_ratio: NotRequired[float]
+    answer_verification_evaluable_count: NotRequired[int]
+
+
+class ExamForgeState(TypedDict, total=False):
+    """LangGraph 파이프라인 전체 상태.
+
+    pipeline_status 값:
+        - (없음)        : 아직 시작 전
+        - "planning"     : 시험 계획 수립 중
+        - "generating"   : 문제 생성 중
+        - "distractors"  : 오답 생성 중
+        - "answering"    : 정답/해설 생성 중
+        - "verifying"    : 교차 검증 중
+        - "validating"   : 구조 검증 중
+        - "calibrating"  : 난이도 보정 중
+        - "formatting"   : 최종 출력 생성 중
+        - "complete"     : 전체 파이프라인 정상 완료
+        - "partial"      : 일부 문제 누락, 나머지는 사용 가능 (passed_partial)
+        - "failed"       : 품질 미달 또는 재시도 소진 (failed_*/exhausted)
+        - "error"        : 인프라 오류로 진행 불가. 하위 노드는 즉시 반환한다
+
+    pipeline_outcome 값:
+        - "passed"                   : 품질 검증 통과, 정상 완료
+        - "passed_partial"           : 일부 문제 제외 후 통과(출고 floor 이상)
+        - "needs_more_source"        : 자료 부족으로 floor 미만. 확보된 고유 문항은 출고하되
+                                       "자료 부족(요청 N / 생성 M)"을 안내한다(비-FAILED).
+        - "exhausted"                : 최대 재시도 소진, 최선 결과 반환
+        - "failed_no_valid_questions": 식별자가 온전한 문항이 0개인 실제 실패
+        - "failed_quality_gate"      : 품질 게이트 미통과
+        - "failed_html_generation"   : HTML 생성 실패로 배포 불가
+    """
+
+    # 입력
+    source_text: str
+    exam_config: dict
+    locale: str
+    category: str
+    subject: str
+    exam_id: str
+
+    # parse_source 출력
+    topics: list[dict]
+    concept_graph: dict
+
+    # plan_exam 출력
+    exam_plan: dict
+
+    # generate_questions 출력
+    questions: list[dict]
+    source_truncated: bool
+
+    # generate_distractors 출력
+    questions_with_distractors: list[dict]
+
+    # generate_answers 출력
+    answered_questions: list[dict]
+
+    # verify_answers 출력
+    verified_questions: list[dict]
+    verification_failures: list[str]
+    verification_parse_failed_count: int
+    verification_parse_failed_ratio: float
+    verification_advisory: bool
+
+    # validate 출력
+    validation_report: dict
+    failed_question_ids: list[str]
+
+    # 제어
+    retry_count: int
+    max_retries: int
+    pipeline_status: str
+    error_message: str | None
+    # 개수 부족 재시도의 비수렴 라운드 수. dedup이 같은 중복을 계속 드롭해
+    # missing_count가 줄지 않으면 캡으로 루프를 끊는다. retry_router_node가 갱신한다.
+    count_stuck_rounds: int
+    prev_missing_count: int
+    # 개수 부족(missing_count > 0) 전용 재시도 카운터. EXAMFORGE_MISSING_RETRY_CAP(기본 3)
+    # 만큼 재시도한 뒤에는 유효 문항만으로 passed 출고한다. codex는 1회에 약 5분 걸린다.
+    missing_retry_count: int
+    # repair_questions 노드가 표적 교정을 적용했는지 여부.
+    # True면 재검증(verify) 경로로, False면 기존 blind 재생성 경로로 라우팅한다.
+    repair_applied: bool
+    # LLM 호출 예산 서킷 브레이커. 과도한 호출로 인한 DoS를 막는다.
+    llm_call_count: int
+    llm_budget_exceeded: bool
+
+    # calibrate 출력
+    calibrated_questions: list[dict]
+
+    # format_output 출력
+    output_html: str | None
+    answers_html: str | None
+    output_json: dict | None
+    quality_metrics: dict
+    timings: dict
+    # 파이프라인 종료 사유. 값은 클래스 docstring 참고
+    pipeline_outcome: str
+    # course 본문이 hard-gate에 못 미쳐 subject/topic 스텁으로 폴백했는지 여부.
+    # True면 강의 내용 대신 일반론으로 출제한다. 생성은 진행하고 추적만 한다.
+    # mock_async_router가 initial_state에 실어 final_state까지 그대로 전달한다.
+    grounding_degraded: bool

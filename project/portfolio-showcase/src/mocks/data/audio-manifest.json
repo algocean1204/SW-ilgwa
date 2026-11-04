@@ -1,0 +1,1682 @@
+[
+ {
+  "subject": "os",
+  "chapter_index": 1,
+  "slide_idx": 0,
+  "duration_sec": 110.9,
+  "path": "audio/os/ch1/slide_0.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 1,
+  "slide_idx": 1,
+  "duration_sec": 113.1,
+  "path": "audio/os/ch1/slide_1.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 1,
+  "slide_idx": 2,
+  "duration_sec": 112.0,
+  "path": "audio/os/ch1/slide_2.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 1,
+  "slide_idx": 3,
+  "duration_sec": 118.4,
+  "path": "audio/os/ch1/slide_3.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 1,
+  "slide_idx": 4,
+  "duration_sec": 111.8,
+  "path": "audio/os/ch1/slide_4.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 1,
+  "slide_idx": 5,
+  "duration_sec": 116.6,
+  "path": "audio/os/ch1/slide_5.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 1,
+  "slide_idx": 6,
+  "duration_sec": 113.3,
+  "path": "audio/os/ch1/slide_6.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 1,
+  "slide_idx": 7,
+  "duration_sec": 116.2,
+  "path": "audio/os/ch1/slide_7.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 2,
+  "slide_idx": 0,
+  "duration_sec": 106.0,
+  "path": "audio/os/ch2/slide_0.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 2,
+  "slide_idx": 1,
+  "duration_sec": 113.1,
+  "path": "audio/os/ch2/slide_1.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 2,
+  "slide_idx": 2,
+  "duration_sec": 108.7,
+  "path": "audio/os/ch2/slide_2.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 2,
+  "slide_idx": 3,
+  "duration_sec": 120.1,
+  "path": "audio/os/ch2/slide_3.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 2,
+  "slide_idx": 4,
+  "duration_sec": 117.6,
+  "path": "audio/os/ch2/slide_4.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 2,
+  "slide_idx": 5,
+  "duration_sec": 124.7,
+  "path": "audio/os/ch2/slide_5.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 2,
+  "slide_idx": 6,
+  "duration_sec": 120.2,
+  "path": "audio/os/ch2/slide_6.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 2,
+  "slide_idx": 7,
+  "duration_sec": 113.3,
+  "path": "audio/os/ch2/slide_7.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 3,
+  "slide_idx": 0,
+  "duration_sec": 106.3,
+  "path": "audio/os/ch3/slide_0.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 3,
+  "slide_idx": 1,
+  "duration_sec": 105.5,
+  "path": "audio/os/ch3/slide_1.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 3,
+  "slide_idx": 2,
+  "duration_sec": 102.5,
+  "path": "audio/os/ch3/slide_2.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 3,
+  "slide_idx": 3,
+  "duration_sec": 114.4,
+  "path": "audio/os/ch3/slide_3.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 3,
+  "slide_idx": 4,
+  "duration_sec": 114.0,
+  "path": "audio/os/ch3/slide_4.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 3,
+  "slide_idx": 5,
+  "duration_sec": 111.3,
+  "path": "audio/os/ch3/slide_5.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 3,
+  "slide_idx": 6,
+  "duration_sec": 116.7,
+  "path": "audio/os/ch3/slide_6.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 3,
+  "slide_idx": 7,
+  "duration_sec": 115.8,
+  "path": "audio/os/ch3/slide_7.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 4,
+  "slide_idx": 0,
+  "duration_sec": 108.4,
+  "path": "audio/os/ch4/slide_0.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 4,
+  "slide_idx": 1,
+  "duration_sec": 114.4,
+  "path": "audio/os/ch4/slide_1.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 4,
+  "slide_idx": 2,
+  "duration_sec": 111.6,
+  "path": "audio/os/ch4/slide_2.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 4,
+  "slide_idx": 3,
+  "duration_sec": 115.8,
+  "path": "audio/os/ch4/slide_3.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 4,
+  "slide_idx": 4,
+  "duration_sec": 110.4,
+  "path": "audio/os/ch4/slide_4.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 4,
+  "slide_idx": 5,
+  "duration_sec": 116.7,
+  "path": "audio/os/ch4/slide_5.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 4,
+  "slide_idx": 6,
+  "duration_sec": 109.9,
+  "path": "audio/os/ch4/slide_6.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 4,
+  "slide_idx": 7,
+  "duration_sec": 117.2,
+  "path": "audio/os/ch4/slide_7.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 5,
+  "slide_idx": 0,
+  "duration_sec": 109.2,
+  "path": "audio/os/ch5/slide_0.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 5,
+  "slide_idx": 1,
+  "duration_sec": 112.6,
+  "path": "audio/os/ch5/slide_1.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 5,
+  "slide_idx": 2,
+  "duration_sec": 114.4,
+  "path": "audio/os/ch5/slide_2.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 5,
+  "slide_idx": 3,
+  "duration_sec": 111.3,
+  "path": "audio/os/ch5/slide_3.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 5,
+  "slide_idx": 4,
+  "duration_sec": 107.0,
+  "path": "audio/os/ch5/slide_4.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 5,
+  "slide_idx": 5,
+  "duration_sec": 115.6,
+  "path": "audio/os/ch5/slide_5.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 5,
+  "slide_idx": 6,
+  "duration_sec": 113.6,
+  "path": "audio/os/ch5/slide_6.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 5,
+  "slide_idx": 7,
+  "duration_sec": 116.6,
+  "path": "audio/os/ch5/slide_7.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 6,
+  "slide_idx": 0,
+  "duration_sec": 108.8,
+  "path": "audio/os/ch6/slide_0.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 6,
+  "slide_idx": 1,
+  "duration_sec": 101.6,
+  "path": "audio/os/ch6/slide_1.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 6,
+  "slide_idx": 2,
+  "duration_sec": 110.8,
+  "path": "audio/os/ch6/slide_2.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 6,
+  "slide_idx": 3,
+  "duration_sec": 108.0,
+  "path": "audio/os/ch6/slide_3.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 6,
+  "slide_idx": 4,
+  "duration_sec": 107.0,
+  "path": "audio/os/ch6/slide_4.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 6,
+  "slide_idx": 5,
+  "duration_sec": 105.0,
+  "path": "audio/os/ch6/slide_5.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 6,
+  "slide_idx": 6,
+  "duration_sec": 119.9,
+  "path": "audio/os/ch6/slide_6.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 6,
+  "slide_idx": 7,
+  "duration_sec": 118.8,
+  "path": "audio/os/ch6/slide_7.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 7,
+  "slide_idx": 0,
+  "duration_sec": 107.3,
+  "path": "audio/os/ch7/slide_0.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 7,
+  "slide_idx": 1,
+  "duration_sec": 115.3,
+  "path": "audio/os/ch7/slide_1.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 7,
+  "slide_idx": 2,
+  "duration_sec": 116.8,
+  "path": "audio/os/ch7/slide_2.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 7,
+  "slide_idx": 3,
+  "duration_sec": 119.2,
+  "path": "audio/os/ch7/slide_3.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 7,
+  "slide_idx": 4,
+  "duration_sec": 118.9,
+  "path": "audio/os/ch7/slide_4.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 7,
+  "slide_idx": 5,
+  "duration_sec": 119.6,
+  "path": "audio/os/ch7/slide_5.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 7,
+  "slide_idx": 6,
+  "duration_sec": 116.8,
+  "path": "audio/os/ch7/slide_6.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 7,
+  "slide_idx": 7,
+  "duration_sec": 117.8,
+  "path": "audio/os/ch7/slide_7.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 8,
+  "slide_idx": 0,
+  "duration_sec": 112.9,
+  "path": "audio/os/ch8/slide_0.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 8,
+  "slide_idx": 1,
+  "duration_sec": 114.3,
+  "path": "audio/os/ch8/slide_1.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 8,
+  "slide_idx": 2,
+  "duration_sec": 120.3,
+  "path": "audio/os/ch8/slide_2.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 8,
+  "slide_idx": 3,
+  "duration_sec": 112.9,
+  "path": "audio/os/ch8/slide_3.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 8,
+  "slide_idx": 4,
+  "duration_sec": 113.8,
+  "path": "audio/os/ch8/slide_4.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 8,
+  "slide_idx": 5,
+  "duration_sec": 427.4,
+  "path": "audio/os/ch8/slide_5.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 8,
+  "slide_idx": 6,
+  "duration_sec": 118.4,
+  "path": "audio/os/ch8/slide_6.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 8,
+  "slide_idx": 7,
+  "duration_sec": 119.8,
+  "path": "audio/os/ch8/slide_7.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 9,
+  "slide_idx": 0,
+  "duration_sec": 106.7,
+  "path": "audio/os/ch9/slide_0.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 9,
+  "slide_idx": 1,
+  "duration_sec": 108.6,
+  "path": "audio/os/ch9/slide_1.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 9,
+  "slide_idx": 2,
+  "duration_sec": 102.6,
+  "path": "audio/os/ch9/slide_2.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 9,
+  "slide_idx": 3,
+  "duration_sec": 104.5,
+  "path": "audio/os/ch9/slide_3.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 9,
+  "slide_idx": 4,
+  "duration_sec": 110.1,
+  "path": "audio/os/ch9/slide_4.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 9,
+  "slide_idx": 5,
+  "duration_sec": 106.3,
+  "path": "audio/os/ch9/slide_5.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 9,
+  "slide_idx": 6,
+  "duration_sec": 108.8,
+  "path": "audio/os/ch9/slide_6.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 9,
+  "slide_idx": 7,
+  "duration_sec": 108.8,
+  "path": "audio/os/ch9/slide_7.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 10,
+  "slide_idx": 0,
+  "duration_sec": 114.6,
+  "path": "audio/os/ch10/slide_0.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 10,
+  "slide_idx": 1,
+  "duration_sec": 113.1,
+  "path": "audio/os/ch10/slide_1.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 10,
+  "slide_idx": 2,
+  "duration_sec": 114.6,
+  "path": "audio/os/ch10/slide_2.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 10,
+  "slide_idx": 3,
+  "duration_sec": 118.8,
+  "path": "audio/os/ch10/slide_3.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 10,
+  "slide_idx": 4,
+  "duration_sec": 113.1,
+  "path": "audio/os/ch10/slide_4.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 10,
+  "slide_idx": 5,
+  "duration_sec": 124.8,
+  "path": "audio/os/ch10/slide_5.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 10,
+  "slide_idx": 6,
+  "duration_sec": 114.1,
+  "path": "audio/os/ch10/slide_6.mp3"
+ },
+ {
+  "subject": "os",
+  "chapter_index": 10,
+  "slide_idx": 7,
+  "duration_sec": 119.0,
+  "path": "audio/os/ch10/slide_7.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 1,
+  "slide_idx": 0,
+  "duration_sec": 118.4,
+  "path": "audio/python/ch1/slide_0.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 1,
+  "slide_idx": 1,
+  "duration_sec": 116.6,
+  "path": "audio/python/ch1/slide_1.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 1,
+  "slide_idx": 2,
+  "duration_sec": 119.1,
+  "path": "audio/python/ch1/slide_2.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 1,
+  "slide_idx": 3,
+  "duration_sec": 119.4,
+  "path": "audio/python/ch1/slide_3.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 1,
+  "slide_idx": 4,
+  "duration_sec": 107.9,
+  "path": "audio/python/ch1/slide_4.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 1,
+  "slide_idx": 5,
+  "duration_sec": 108.4,
+  "path": "audio/python/ch1/slide_5.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 1,
+  "slide_idx": 6,
+  "duration_sec": 115.3,
+  "path": "audio/python/ch1/slide_6.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 1,
+  "slide_idx": 7,
+  "duration_sec": 118.8,
+  "path": "audio/python/ch1/slide_7.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 2,
+  "slide_idx": 0,
+  "duration_sec": 102.2,
+  "path": "audio/python/ch2/slide_0.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 2,
+  "slide_idx": 1,
+  "duration_sec": 118.8,
+  "path": "audio/python/ch2/slide_1.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 2,
+  "slide_idx": 2,
+  "duration_sec": 109.7,
+  "path": "audio/python/ch2/slide_2.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 2,
+  "slide_idx": 3,
+  "duration_sec": 110.4,
+  "path": "audio/python/ch2/slide_3.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 2,
+  "slide_idx": 4,
+  "duration_sec": 113.4,
+  "path": "audio/python/ch2/slide_4.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 2,
+  "slide_idx": 5,
+  "duration_sec": 108.6,
+  "path": "audio/python/ch2/slide_5.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 2,
+  "slide_idx": 6,
+  "duration_sec": 112.8,
+  "path": "audio/python/ch2/slide_6.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 2,
+  "slide_idx": 7,
+  "duration_sec": 118.2,
+  "path": "audio/python/ch2/slide_7.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 3,
+  "slide_idx": 0,
+  "duration_sec": 113.5,
+  "path": "audio/python/ch3/slide_0.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 3,
+  "slide_idx": 1,
+  "duration_sec": 104.0,
+  "path": "audio/python/ch3/slide_1.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 3,
+  "slide_idx": 2,
+  "duration_sec": 112.0,
+  "path": "audio/python/ch3/slide_2.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 3,
+  "slide_idx": 3,
+  "duration_sec": 107.7,
+  "path": "audio/python/ch3/slide_3.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 3,
+  "slide_idx": 4,
+  "duration_sec": 108.7,
+  "path": "audio/python/ch3/slide_4.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 3,
+  "slide_idx": 5,
+  "duration_sec": 114.9,
+  "path": "audio/python/ch3/slide_5.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 3,
+  "slide_idx": 6,
+  "duration_sec": 117.9,
+  "path": "audio/python/ch3/slide_6.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 3,
+  "slide_idx": 7,
+  "duration_sec": 111.2,
+  "path": "audio/python/ch3/slide_7.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 4,
+  "slide_idx": 0,
+  "duration_sec": 115.1,
+  "path": "audio/python/ch4/slide_0.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 4,
+  "slide_idx": 1,
+  "duration_sec": 108.7,
+  "path": "audio/python/ch4/slide_1.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 4,
+  "slide_idx": 2,
+  "duration_sec": 107.2,
+  "path": "audio/python/ch4/slide_2.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 4,
+  "slide_idx": 3,
+  "duration_sec": 112.3,
+  "path": "audio/python/ch4/slide_3.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 4,
+  "slide_idx": 4,
+  "duration_sec": 106.9,
+  "path": "audio/python/ch4/slide_4.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 4,
+  "slide_idx": 5,
+  "duration_sec": 114.2,
+  "path": "audio/python/ch4/slide_5.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 4,
+  "slide_idx": 6,
+  "duration_sec": 114.1,
+  "path": "audio/python/ch4/slide_6.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 4,
+  "slide_idx": 7,
+  "duration_sec": 431.9,
+  "path": "audio/python/ch4/slide_7.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 5,
+  "slide_idx": 0,
+  "duration_sec": 107.2,
+  "path": "audio/python/ch5/slide_0.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 5,
+  "slide_idx": 1,
+  "duration_sec": 112.4,
+  "path": "audio/python/ch5/slide_1.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 5,
+  "slide_idx": 2,
+  "duration_sec": 110.4,
+  "path": "audio/python/ch5/slide_2.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 5,
+  "slide_idx": 3,
+  "duration_sec": 101.2,
+  "path": "audio/python/ch5/slide_3.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 5,
+  "slide_idx": 4,
+  "duration_sec": 116.4,
+  "path": "audio/python/ch5/slide_4.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 5,
+  "slide_idx": 5,
+  "duration_sec": 108.0,
+  "path": "audio/python/ch5/slide_5.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 5,
+  "slide_idx": 6,
+  "duration_sec": 114.8,
+  "path": "audio/python/ch5/slide_6.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 5,
+  "slide_idx": 7,
+  "duration_sec": 114.5,
+  "path": "audio/python/ch5/slide_7.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 6,
+  "slide_idx": 0,
+  "duration_sec": 107.6,
+  "path": "audio/python/ch6/slide_0.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 6,
+  "slide_idx": 1,
+  "duration_sec": 122.4,
+  "path": "audio/python/ch6/slide_1.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 6,
+  "slide_idx": 2,
+  "duration_sec": 109.2,
+  "path": "audio/python/ch6/slide_2.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 6,
+  "slide_idx": 3,
+  "duration_sec": 109.6,
+  "path": "audio/python/ch6/slide_3.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 6,
+  "slide_idx": 4,
+  "duration_sec": 108.4,
+  "path": "audio/python/ch6/slide_4.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 6,
+  "slide_idx": 5,
+  "duration_sec": 104.1,
+  "path": "audio/python/ch6/slide_5.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 6,
+  "slide_idx": 6,
+  "duration_sec": 104.3,
+  "path": "audio/python/ch6/slide_6.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 6,
+  "slide_idx": 7,
+  "duration_sec": 113.6,
+  "path": "audio/python/ch6/slide_7.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 7,
+  "slide_idx": 0,
+  "duration_sec": 112.4,
+  "path": "audio/python/ch7/slide_0.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 7,
+  "slide_idx": 1,
+  "duration_sec": 108.3,
+  "path": "audio/python/ch7/slide_1.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 7,
+  "slide_idx": 2,
+  "duration_sec": 102.9,
+  "path": "audio/python/ch7/slide_2.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 7,
+  "slide_idx": 3,
+  "duration_sec": 112.4,
+  "path": "audio/python/ch7/slide_3.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 7,
+  "slide_idx": 4,
+  "duration_sec": 107.6,
+  "path": "audio/python/ch7/slide_4.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 7,
+  "slide_idx": 5,
+  "duration_sec": 101.0,
+  "path": "audio/python/ch7/slide_5.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 7,
+  "slide_idx": 6,
+  "duration_sec": 109.2,
+  "path": "audio/python/ch7/slide_6.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 7,
+  "slide_idx": 7,
+  "duration_sec": 112.4,
+  "path": "audio/python/ch7/slide_7.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 8,
+  "slide_idx": 0,
+  "duration_sec": 115.2,
+  "path": "audio/python/ch8/slide_0.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 8,
+  "slide_idx": 1,
+  "duration_sec": 107.8,
+  "path": "audio/python/ch8/slide_1.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 8,
+  "slide_idx": 2,
+  "duration_sec": 105.5,
+  "path": "audio/python/ch8/slide_2.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 8,
+  "slide_idx": 3,
+  "duration_sec": 108.4,
+  "path": "audio/python/ch8/slide_3.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 8,
+  "slide_idx": 4,
+  "duration_sec": 101.6,
+  "path": "audio/python/ch8/slide_4.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 8,
+  "slide_idx": 5,
+  "duration_sec": 113.6,
+  "path": "audio/python/ch8/slide_5.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 8,
+  "slide_idx": 6,
+  "duration_sec": 110.5,
+  "path": "audio/python/ch8/slide_6.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 8,
+  "slide_idx": 7,
+  "duration_sec": 118.2,
+  "path": "audio/python/ch8/slide_7.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 9,
+  "slide_idx": 0,
+  "duration_sec": 105.4,
+  "path": "audio/python/ch9/slide_0.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 9,
+  "slide_idx": 1,
+  "duration_sec": 105.9,
+  "path": "audio/python/ch9/slide_1.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 9,
+  "slide_idx": 2,
+  "duration_sec": 105.2,
+  "path": "audio/python/ch9/slide_2.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 9,
+  "slide_idx": 3,
+  "duration_sec": 113.5,
+  "path": "audio/python/ch9/slide_3.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 9,
+  "slide_idx": 4,
+  "duration_sec": 114.5,
+  "path": "audio/python/ch9/slide_4.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 9,
+  "slide_idx": 5,
+  "duration_sec": 114.6,
+  "path": "audio/python/ch9/slide_5.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 9,
+  "slide_idx": 6,
+  "duration_sec": 110.4,
+  "path": "audio/python/ch9/slide_6.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 9,
+  "slide_idx": 7,
+  "duration_sec": 121.3,
+  "path": "audio/python/ch9/slide_7.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 10,
+  "slide_idx": 0,
+  "duration_sec": 113.2,
+  "path": "audio/python/ch10/slide_0.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 10,
+  "slide_idx": 1,
+  "duration_sec": 109.1,
+  "path": "audio/python/ch10/slide_1.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 10,
+  "slide_idx": 2,
+  "duration_sec": 107.1,
+  "path": "audio/python/ch10/slide_2.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 10,
+  "slide_idx": 3,
+  "duration_sec": 104.3,
+  "path": "audio/python/ch10/slide_3.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 10,
+  "slide_idx": 4,
+  "duration_sec": 114.2,
+  "path": "audio/python/ch10/slide_4.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 10,
+  "slide_idx": 5,
+  "duration_sec": 110.4,
+  "path": "audio/python/ch10/slide_5.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 10,
+  "slide_idx": 6,
+  "duration_sec": 117.0,
+  "path": "audio/python/ch10/slide_6.mp3"
+ },
+ {
+  "subject": "python",
+  "chapter_index": 10,
+  "slide_idx": 7,
+  "duration_sec": 116.4,
+  "path": "audio/python/ch10/slide_7.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 1,
+  "slide_idx": 0,
+  "duration_sec": 104.8,
+  "path": "audio/rust/ch1/slide_0.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 1,
+  "slide_idx": 1,
+  "duration_sec": 110.9,
+  "path": "audio/rust/ch1/slide_1.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 1,
+  "slide_idx": 2,
+  "duration_sec": 105.4,
+  "path": "audio/rust/ch1/slide_2.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 1,
+  "slide_idx": 3,
+  "duration_sec": 109.0,
+  "path": "audio/rust/ch1/slide_3.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 1,
+  "slide_idx": 4,
+  "duration_sec": 106.7,
+  "path": "audio/rust/ch1/slide_4.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 1,
+  "slide_idx": 5,
+  "duration_sec": 108.5,
+  "path": "audio/rust/ch1/slide_5.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 1,
+  "slide_idx": 6,
+  "duration_sec": 107.9,
+  "path": "audio/rust/ch1/slide_6.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 1,
+  "slide_idx": 7,
+  "duration_sec": 112.9,
+  "path": "audio/rust/ch1/slide_7.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 2,
+  "slide_idx": 0,
+  "duration_sec": 111.2,
+  "path": "audio/rust/ch2/slide_0.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 2,
+  "slide_idx": 1,
+  "duration_sec": 117.8,
+  "path": "audio/rust/ch2/slide_1.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 2,
+  "slide_idx": 2,
+  "duration_sec": 111.0,
+  "path": "audio/rust/ch2/slide_2.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 2,
+  "slide_idx": 3,
+  "duration_sec": 110.8,
+  "path": "audio/rust/ch2/slide_3.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 2,
+  "slide_idx": 4,
+  "duration_sec": 112.8,
+  "path": "audio/rust/ch2/slide_4.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 2,
+  "slide_idx": 5,
+  "duration_sec": 109.4,
+  "path": "audio/rust/ch2/slide_5.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 2,
+  "slide_idx": 6,
+  "duration_sec": 110.4,
+  "path": "audio/rust/ch2/slide_6.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 2,
+  "slide_idx": 7,
+  "duration_sec": 115.7,
+  "path": "audio/rust/ch2/slide_7.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 3,
+  "slide_idx": 0,
+  "duration_sec": 115.8,
+  "path": "audio/rust/ch3/slide_0.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 3,
+  "slide_idx": 1,
+  "duration_sec": 113.3,
+  "path": "audio/rust/ch3/slide_1.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 3,
+  "slide_idx": 2,
+  "duration_sec": 109.4,
+  "path": "audio/rust/ch3/slide_2.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 3,
+  "slide_idx": 3,
+  "duration_sec": 112.7,
+  "path": "audio/rust/ch3/slide_3.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 3,
+  "slide_idx": 4,
+  "duration_sec": 102.4,
+  "path": "audio/rust/ch3/slide_4.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 3,
+  "slide_idx": 5,
+  "duration_sec": 113.6,
+  "path": "audio/rust/ch3/slide_5.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 3,
+  "slide_idx": 6,
+  "duration_sec": 112.3,
+  "path": "audio/rust/ch3/slide_6.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 3,
+  "slide_idx": 7,
+  "duration_sec": 108.6,
+  "path": "audio/rust/ch3/slide_7.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 4,
+  "slide_idx": 0,
+  "duration_sec": 110.5,
+  "path": "audio/rust/ch4/slide_0.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 4,
+  "slide_idx": 1,
+  "duration_sec": 113.5,
+  "path": "audio/rust/ch4/slide_1.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 4,
+  "slide_idx": 2,
+  "duration_sec": 105.7,
+  "path": "audio/rust/ch4/slide_2.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 4,
+  "slide_idx": 3,
+  "duration_sec": 109.2,
+  "path": "audio/rust/ch4/slide_3.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 4,
+  "slide_idx": 4,
+  "duration_sec": 115.0,
+  "path": "audio/rust/ch4/slide_4.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 4,
+  "slide_idx": 5,
+  "duration_sec": 107.4,
+  "path": "audio/rust/ch4/slide_5.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 4,
+  "slide_idx": 6,
+  "duration_sec": 110.4,
+  "path": "audio/rust/ch4/slide_6.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 4,
+  "slide_idx": 7,
+  "duration_sec": 109.2,
+  "path": "audio/rust/ch4/slide_7.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 5,
+  "slide_idx": 0,
+  "duration_sec": 102.7,
+  "path": "audio/rust/ch5/slide_0.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 5,
+  "slide_idx": 1,
+  "duration_sec": 107.2,
+  "path": "audio/rust/ch5/slide_1.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 5,
+  "slide_idx": 2,
+  "duration_sec": 108.2,
+  "path": "audio/rust/ch5/slide_2.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 5,
+  "slide_idx": 3,
+  "duration_sec": 109.6,
+  "path": "audio/rust/ch5/slide_3.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 5,
+  "slide_idx": 4,
+  "duration_sec": 117.5,
+  "path": "audio/rust/ch5/slide_4.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 5,
+  "slide_idx": 5,
+  "duration_sec": 113.6,
+  "path": "audio/rust/ch5/slide_5.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 5,
+  "slide_idx": 6,
+  "duration_sec": 112.9,
+  "path": "audio/rust/ch5/slide_6.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 5,
+  "slide_idx": 7,
+  "duration_sec": 116.0,
+  "path": "audio/rust/ch5/slide_7.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 6,
+  "slide_idx": 0,
+  "duration_sec": 107.0,
+  "path": "audio/rust/ch6/slide_0.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 6,
+  "slide_idx": 1,
+  "duration_sec": 109.1,
+  "path": "audio/rust/ch6/slide_1.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 6,
+  "slide_idx": 2,
+  "duration_sec": 103.4,
+  "path": "audio/rust/ch6/slide_2.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 6,
+  "slide_idx": 3,
+  "duration_sec": 100.1,
+  "path": "audio/rust/ch6/slide_3.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 6,
+  "slide_idx": 4,
+  "duration_sec": 107.2,
+  "path": "audio/rust/ch6/slide_4.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 6,
+  "slide_idx": 5,
+  "duration_sec": 104.1,
+  "path": "audio/rust/ch6/slide_5.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 6,
+  "slide_idx": 6,
+  "duration_sec": 105.3,
+  "path": "audio/rust/ch6/slide_6.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 6,
+  "slide_idx": 7,
+  "duration_sec": 112.3,
+  "path": "audio/rust/ch6/slide_7.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 7,
+  "slide_idx": 0,
+  "duration_sec": 109.7,
+  "path": "audio/rust/ch7/slide_0.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 7,
+  "slide_idx": 1,
+  "duration_sec": 115.6,
+  "path": "audio/rust/ch7/slide_1.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 7,
+  "slide_idx": 2,
+  "duration_sec": 110.7,
+  "path": "audio/rust/ch7/slide_2.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 7,
+  "slide_idx": 3,
+  "duration_sec": 105.8,
+  "path": "audio/rust/ch7/slide_3.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 7,
+  "slide_idx": 4,
+  "duration_sec": 112.6,
+  "path": "audio/rust/ch7/slide_4.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 7,
+  "slide_idx": 5,
+  "duration_sec": 119.3,
+  "path": "audio/rust/ch7/slide_5.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 7,
+  "slide_idx": 6,
+  "duration_sec": 138.1,
+  "path": "audio/rust/ch7/slide_6.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 7,
+  "slide_idx": 7,
+  "duration_sec": 117.0,
+  "path": "audio/rust/ch7/slide_7.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 8,
+  "slide_idx": 0,
+  "duration_sec": 106.3,
+  "path": "audio/rust/ch8/slide_0.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 8,
+  "slide_idx": 1,
+  "duration_sec": 111.2,
+  "path": "audio/rust/ch8/slide_1.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 8,
+  "slide_idx": 2,
+  "duration_sec": 108.3,
+  "path": "audio/rust/ch8/slide_2.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 8,
+  "slide_idx": 3,
+  "duration_sec": 117.3,
+  "path": "audio/rust/ch8/slide_3.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 8,
+  "slide_idx": 4,
+  "duration_sec": 109.9,
+  "path": "audio/rust/ch8/slide_4.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 8,
+  "slide_idx": 5,
+  "duration_sec": 110.8,
+  "path": "audio/rust/ch8/slide_5.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 8,
+  "slide_idx": 6,
+  "duration_sec": 108.2,
+  "path": "audio/rust/ch8/slide_6.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 8,
+  "slide_idx": 7,
+  "duration_sec": 111.6,
+  "path": "audio/rust/ch8/slide_7.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 9,
+  "slide_idx": 0,
+  "duration_sec": 106.6,
+  "path": "audio/rust/ch9/slide_0.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 9,
+  "slide_idx": 1,
+  "duration_sec": 103.8,
+  "path": "audio/rust/ch9/slide_1.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 9,
+  "slide_idx": 2,
+  "duration_sec": 112.4,
+  "path": "audio/rust/ch9/slide_2.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 9,
+  "slide_idx": 3,
+  "duration_sec": 108.4,
+  "path": "audio/rust/ch9/slide_3.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 9,
+  "slide_idx": 4,
+  "duration_sec": 113.4,
+  "path": "audio/rust/ch9/slide_4.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 9,
+  "slide_idx": 5,
+  "duration_sec": 112.0,
+  "path": "audio/rust/ch9/slide_5.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 9,
+  "slide_idx": 6,
+  "duration_sec": 108.6,
+  "path": "audio/rust/ch9/slide_6.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 9,
+  "slide_idx": 7,
+  "duration_sec": 113.3,
+  "path": "audio/rust/ch9/slide_7.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 10,
+  "slide_idx": 0,
+  "duration_sec": 111.7,
+  "path": "audio/rust/ch10/slide_0.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 10,
+  "slide_idx": 1,
+  "duration_sec": 103.8,
+  "path": "audio/rust/ch10/slide_1.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 10,
+  "slide_idx": 2,
+  "duration_sec": 114.2,
+  "path": "audio/rust/ch10/slide_2.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 10,
+  "slide_idx": 3,
+  "duration_sec": 113.1,
+  "path": "audio/rust/ch10/slide_3.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 10,
+  "slide_idx": 4,
+  "duration_sec": 107.1,
+  "path": "audio/rust/ch10/slide_4.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 10,
+  "slide_idx": 5,
+  "duration_sec": 107.2,
+  "path": "audio/rust/ch10/slide_5.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 10,
+  "slide_idx": 6,
+  "duration_sec": 112.3,
+  "path": "audio/rust/ch10/slide_6.mp3"
+ },
+ {
+  "subject": "rust",
+  "chapter_index": 10,
+  "slide_idx": 7,
+  "duration_sec": 112.5,
+  "path": "audio/rust/ch10/slide_7.mp3"
+ }
+]

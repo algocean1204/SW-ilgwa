@@ -1,0 +1,167 @@
+"""강의 생성 API 라우터. Spring CourseService.confirmCurriculum이 호출한다.
+
+Spring은 커리큘럼을 확정하면 {courseId}만 보내고(fire-and-forget) 바로 202를 받는다.
+실제 강의 생성(모든 chapter 순회)은 백그라운드에서 하고, Spring은 이후
+GET /tutoring/{id}/lessons/{chapterId}/slides 등으로 폴링한다.
+"""
+from __future__ import annotations
+
+import logging
+
+from fastapi import APIRouter, BackgroundTasks
+from pydantic import BaseModel, Field
+
+from app.modules.ChapterStudio_V1.app.lesson_audio_backfill import backfill_lesson_audio_with_gpu_release
+from app.modules.ChapterStudio_V1.app.lessons_generate import generate_lesson_for_chapter, generate_lessons_for_course
+from app.modules.ChapterStudio_V1.db.persistence_status import fetch_chapter_generation_status
+from common.db import get_connection
+
+_LOG = logging.getLogger(__name__)
+
+router = APIRouter(prefix="/api/lessons", tags=["lessons"])
+
+
+async def _run_course_generation_logged(course_id: str) -> None:
+    """course 전체 생성을 BackgroundTask로 돌리고, 처리되지 않은 예외를 전체 스택과 함께 남긴다.
+
+    FastAPI BackgroundTask는 예외를 조용히 삼키므로 여기서 감싸 로그를 남긴 뒤
+    동작이 바뀌지 않게 다시 전파한다.
+    """
+    try:
+        await generate_lessons_for_course(course_id)
+    except Exception:
+        _LOG.exception("[lessons] background 강의 일괄 생성 미처리 예외 — courseId=%s", course_id)
+        raise
+
+
+async def _run_lesson_generation_logged(course_id: str, lesson_id: str, **kwargs: object) -> None:
+    """단건 강의 생성을 BackgroundTask로 돌리고, 처리되지 않은 예외를 전체 스택과 함께 남긴다.
+
+    BackgroundTask가 삼키는 예외를 먼저 로그로 남기고 그대로 다시 전파한다.
+    """
+    try:
+        await generate_lesson_for_chapter(course_id, lesson_id, **kwargs)
+    except Exception:
+        _LOG.exception(
+            "[lessons] background 강의 생성 미처리 예외 — courseId=%s lessonId=%s",
+            course_id,
+            lesson_id,
+        )
+        raise
+
+
+class LessonsGenerateRequest(BaseModel):
+    """Spring CourseService.requestLessonGeneration이 보내는 바디다."""
+
+    courseId: str = Field(min_length=1)
+
+
+class LessonGenerateOneRequest(BaseModel):
+    """단건 progressive 강의 생성 요청 바디다."""
+
+    courseId: str = Field(min_length=1)
+    lessonId: str = Field(min_length=1)
+    audienceLevel: str | None = Field(default=None, max_length=80)
+    learningGoal: str | None = Field(default=None, max_length=160)
+    tone: int | None = Field(default=None, ge=0, le=100)
+    pace: int | None = Field(default=None, ge=0, le=100)
+    tutorDepth: int | None = Field(default=None, ge=0, le=100)
+    socratic: int | None = Field(default=None, ge=0, le=100)
+    useFormalSpeech: bool | None = None
+    useEmoji: bool | None = None
+    tutorName: str | None = Field(default=None, max_length=80)
+    tutorTagline: str | None = Field(default=None, max_length=160)
+    isDefaultTutor: bool | None = None
+    voiceSampleUrl: str | None = Field(default=None, max_length=1000)
+
+
+class LessonAudioBackfillRequest(BaseModel):
+    """저장된 강의의 음성만 후처리로 채우는 요청 바디다."""
+
+    tutorId: str | None = Field(default=None, min_length=1, max_length=30)
+
+
+@router.post("/generate", status_code=202)
+async def generate_lessons(
+    req: LessonsGenerateRequest, background_tasks: BackgroundTasks
+) -> dict[str, object]:
+    """강의 생성을 비동기로 시작하고 202를 즉시 반환한다."""
+    background_tasks.add_task(_run_course_generation_logged, req.courseId)
+    return {"accepted": True, "courseId": req.courseId}
+
+
+@router.post("/generate-one", status_code=202)
+async def generate_one_lesson(
+    req: LessonGenerateOneRequest, background_tasks: BackgroundTasks
+) -> dict[str, object]:
+    """강의 1개를 비동기로 생성하고 202를 즉시 반환한다."""
+    background_tasks.add_task(
+        _run_lesson_generation_logged,
+        req.courseId,
+        req.lessonId,
+        audience_level=req.audienceLevel,
+        learning_goal=req.learningGoal,
+        tone=req.tone,
+        pace=req.pace,
+        tutor_depth=req.tutorDepth,
+        socratic=req.socratic,
+        use_formal_speech=req.useFormalSpeech,
+        use_emoji=req.useEmoji,
+        tutor_name=req.tutorName,
+        tutor_tagline=req.tutorTagline,
+        is_default_tutor=req.isDefaultTutor,
+        voice_sample_url=req.voiceSampleUrl,
+    )
+    return {"accepted": True, "courseId": req.courseId, "lessonId": req.lessonId}
+
+
+class LessonGenerationStatusResponse(BaseModel):
+    """강의 생성 진행 상태 응답이다. Spring 프록시가 그대로 프론트에 전달한다.
+
+    status: unknown(행 없음) / pending / running / done / failed
+    currentNode: 마지막으로 완료된 그래프 노드명 (running_status는 generate_chapter_state)
+    progressPercent: 0~100 노드 단위 진행률
+    """
+
+    lessonId: str
+    status: str
+    currentNode: str | None = None
+    completedNodes: int = 0
+    totalNodes: int = 0
+    progressPercent: int = 0
+    errorMessage: str | None = None
+
+
+@router.get("/{lessonId}/generation-status", response_model=LessonGenerationStatusResponse)
+async def get_lesson_generation_status(lessonId: str) -> LessonGenerationStatusResponse:
+    """강의 생성 노드 단위 진행 상태를 반환한다.
+
+    Spring GET /tutoring/{courseId}/lessons/{chapterId}/generation-status가 폴링하며
+    소유권 검증은 Spring이 한다. 상태 행이 아직 없으면 status=unknown으로 응답해
+    호출 측이 404 분기 없이 기존 챕터 단위 표시로 돌아가게 한다.
+    """
+    async with get_connection() as conn:
+        row = await fetch_chapter_generation_status(conn, lessonId)
+    if row is None:
+        return LessonGenerationStatusResponse(lessonId=lessonId, status="unknown")
+    return LessonGenerationStatusResponse(
+        lessonId=lessonId,
+        status=str(row["status"]),
+        currentNode=row["current_node"],  # type: ignore[arg-type]
+        completedNodes=int(row["completed_nodes"] or 0),  # type: ignore[arg-type]
+        totalNodes=int(row["total_nodes"] or 0),  # type: ignore[arg-type]
+        progressPercent=int(row["progress_percent"] or 0),  # type: ignore[arg-type]
+        errorMessage=row["error_message"],  # type: ignore[arg-type]
+    )
+
+
+@router.post("/{lessonId}/audio-backfill", status_code=202)
+async def backfill_lesson_audio_route(
+    lessonId: str,
+    background_tasks: BackgroundTasks,
+    req: LessonAudioBackfillRequest | None = None,
+) -> dict[str, object]:
+    """강의 재생성 없이 저장된 음성대본의 오디오 URL 생성을 예약한다."""
+    tutor_id = req.tutorId if req is not None else None
+    background_tasks.add_task(backfill_lesson_audio_with_gpu_release, lessonId, tutor_id)
+    return {"accepted": True, "lessonId": lessonId}

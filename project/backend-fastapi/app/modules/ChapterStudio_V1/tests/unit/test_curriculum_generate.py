@@ -1,0 +1,575 @@
+"""curriculum_generate의 plan-first 슬롯 대조 로직 회귀 테스트.
+
+_parse_and_validate 1:1 대조 게이트, _slot_response_to_lesson 키 계약,
+_repair_missing_slots 부족 슬롯만 복구, happy-path를 AI 실호출 없이 검증한다.
+이 대조가 깨지면 AI가 슬롯 구조를 바꿔도 그대로 저장된다.
+"""
+from __future__ import annotations
+
+import json
+
+import pytest
+
+from app.modules.ChapterStudio_V1.ai_connectors.base import AIConnector
+from app.modules.ChapterStudio_V1.ai_connectors.schemas import (
+    ChapterAIRequest,
+    ChapterAIResponse,
+)
+from app.modules.ChapterStudio_V1.app.curriculum_blueprint import (
+    ChapterSlot,
+    build_curriculum_blueprint,
+)
+from app.modules.ChapterStudio_V1.app.curriculum_generate import (
+    _extract_slots_list,
+    _learning_topics_for_blueprint,
+    _parse_and_validate,
+    _plan_with_blueprint,
+    _repair_missing_slots,
+    _slot_response_to_lesson,
+)
+
+
+def _slot_item(slot: ChapterSlot, *, stage_override: str | None = None) -> dict:
+    """블루프린트 슬롯에 대응하는 AI 응답 아이템을 만든다.
+
+    stage_override를 주면 stage를 변조해 1:1 불일치 상황을 시뮬레이션한다.
+    """
+    return {
+        "order": slot.order,
+        "stage": stage_override if stage_override is not None else slot.stage,
+        "title": f"{slot.order}강 제목",
+        "summary": "한 문장 요약이다.",
+        "learning_goal": "학습 목표를 달성한다.",
+        "key_topics": ["키워드1", "키워드2", "키워드3"],
+    }
+
+
+def _to_json(items: list[dict]) -> str:
+    return json.dumps(items, ensure_ascii=False)
+
+
+def _resp(text: str) -> ChapterAIResponse:
+    return ChapterAIResponse(
+        text=text,
+        model="test-model",
+        input_tokens=1,
+        output_tokens=1,
+        finish_reason="stop",
+    )
+
+
+class _RecordingConnector(AIConnector):
+    """호출 횟수와 전달된 프롬프트를 기록하는 가짜 AIConnector다.
+
+    응답 시퀀스를 미리 주입받아 순서대로 반환한다.
+    Protocol(runtime_checkable) isinstance 검사를 통과하도록 모든 메서드를 구현한다.
+    """
+
+    name = "recording-test-connector"
+
+    def __init__(self, responses: list[ChapterAIResponse]) -> None:
+        self._responses = list(responses)
+        self.calls: list[ChapterAIRequest] = []
+
+    async def generate(self, req: ChapterAIRequest) -> ChapterAIResponse:
+        self.calls.append(req)
+        return self._responses.pop(0)
+
+    async def generate_batch(
+        self, reqs: list[ChapterAIRequest]
+    ) -> list[ChapterAIResponse]:
+        return [await self.generate(req) for req in reqs]
+
+    def supports(self, feature: str) -> bool:
+        return False
+
+
+def test_parse_drops_extra_orders_beyond_blueprint() -> None:
+    """AI가 N+1개를 반환하면 블루프린트에 없는 order(초과분)는 drop되어 len==N이 된다."""
+    n = 5
+    blueprint = build_curriculum_blueprint(subject="수학", lesson_count=n)
+    items = [_slot_item(s) for s in blueprint]
+    # 블루프린트에 없는 order=6 슬롯(초과분)을 붙인다.
+    items.append(
+        {
+            "order": 6,
+            "stage": "마무리",
+            "title": "초과 슬롯",
+            "summary": "버려져야 한다.",
+            "learning_goal": "목표",
+            "key_topics": ["a", "b", "c"],
+        }
+    )
+
+    result = _parse_and_validate(_to_json(items), blueprint)
+
+    assert len(result) == n, f"초과분 drop 실패 — len={len(result)}"
+    assert [r.order for r in result] == [1, 2, 3, 4, 5]
+
+
+def test_parse_drops_stage_tampered_slot() -> None:
+    """AI가 stage를 변조한 슬롯은 1:1 불일치로 drop되어 shortage(N미달)가 된다."""
+    n = 5
+    blueprint = build_curriculum_blueprint(subject="과학", lesson_count=n)
+    items = [_slot_item(s) for s in blueprint]
+    # order=3 슬롯의 stage를 블루프린트와 다른 값으로 바꾼다.
+    tampered_stage = "엉뚱한단계"
+    assert items[2]["stage"] != tampered_stage
+    items[2]["stage"] = tampered_stage
+
+    result = _parse_and_validate(_to_json(items), blueprint)
+
+    assert len(result) == n - 1, f"변조 슬롯 drop 실패 — len={len(result)}"
+    assert 3 not in [r.order for r in result], "변조된 order=3이 살아남았다"
+
+
+def test_parse_restores_order_from_shuffled_response() -> None:
+    """order가 뒤섞인 응답도 order 기준 오름차순으로 정렬 복원된다."""
+    n = 5
+    blueprint = build_curriculum_blueprint(subject="영어", lesson_count=n)
+    items = [_slot_item(s) for s in blueprint]
+    shuffled = list(reversed(items))
+
+    result = _parse_and_validate(_to_json(shuffled), blueprint)
+
+    assert [r.order for r in result] == [1, 2, 3, 4, 5], "order 정렬 복원 실패"
+
+
+def test_parse_dedups_duplicate_order() -> None:
+    """동일 order가 중복된 응답은 첫 번째만 유지해 dedup된다."""
+    n = 5
+    blueprint = build_curriculum_blueprint(subject="역사", lesson_count=n)
+    items = [_slot_item(s) for s in blueprint]
+    # order=2 슬롯을 제목만 바꿔 한 번 더 넣는다.
+    dup = dict(items[1])
+    dup["title"] = "중복된 2강"
+    items.append(dup)
+
+    result = _parse_and_validate(_to_json(items), blueprint)
+
+    orders = [r.order for r in result]
+    assert len(result) == n, f"dedup 실패 — len={len(result)}"
+    assert orders.count(2) == 1, "order=2가 중복 잔존한다"
+    order2 = next(r for r in result if r.order == 2)
+    assert order2.title == "2강 제목", "dedup이 첫 번째가 아닌 항목을 남겼다"
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "",                       # 빈 응답
+        "그냥 텍스트 설명입니다",   # 배열 없음
+        "{}",                     # 객체(non-list)
+        '{"order": 1}',           # 단일 객체
+        "[",                      # 깨진 배열
+        "쓰레기 [not json] 더미",  # 파싱 불가
+    ],
+)
+def test_parse_garbage_returns_empty_safely(raw: str) -> None:
+    """non-list/garbage/빈 응답은 예외 없이 빈 리스트가 되어 shortage 게이트로 넘어간다."""
+    n = 5
+    blueprint = build_curriculum_blueprint(subject="물리", lesson_count=n)
+
+    result = _parse_and_validate(raw, blueprint)
+
+    assert result == [], f"garbage 입력이 빈 리스트로 처리되지 않음 — {raw!r} → {result}"
+
+
+def test_parse_object_non_list_returns_empty() -> None:
+    """JSON 배열이 아닌 객체 안에 lessons가 있어도 최상위 non-list면 빈 리스트다."""
+    n = 5
+    blueprint = build_curriculum_blueprint(subject="화학", lesson_count=n)
+    # 대괄호는 있지만 최상위가 배열이 아니라 find('[')가 객체 내부를 잡는다.
+    raw = json.dumps({"wrapper": [_slot_item(s) for s in blueprint]}, ensure_ascii=False)
+
+    result = _parse_and_validate(raw, blueprint)
+
+    # substring이 내부 배열을 잡아 슬롯 dict 리스트로 파싱되므로 살아남아도 정상이다.
+    # 여기서는 예외 없이 처리되는지만 본다.
+    assert isinstance(result, list)
+
+
+_EXPECTED_LESSON_KEYS = {
+    "order",
+    "title",
+    "description",
+    "slide_count",
+    "estimated_minutes",
+    "learning_goal",
+    "key_topics",
+}
+
+
+def test_slot_to_lesson_exact_keys() -> None:
+    """산출 dict 키가 persist_curriculum 계약과 정확히 일치한다."""
+    blueprint = build_curriculum_blueprint(subject="국어", lesson_count=5)
+    slot = blueprint[0]
+    items = [_slot_item(slot)]
+    sr = _parse_and_validate(_to_json(items), blueprint)[0]
+
+    lesson = _slot_response_to_lesson(sr, slot)
+
+    assert set(lesson.keys()) == _EXPECTED_LESSON_KEYS, (
+        f"키 계약 위반 — 실제={set(lesson.keys())}"
+    )
+    # summary가 description으로 매핑된다.
+    assert lesson["description"] == sr.summary
+    assert lesson["title"] == sr.title
+    assert lesson["learning_goal"] == sr.learning_goal
+
+
+def test_slot_to_lesson_key_topics_clamp_upper() -> None:
+    """key_topics가 5개 초과로 들어와도(Pydantic 게이트 우회 가정) 5개로 clamp된다."""
+    blueprint = build_curriculum_blueprint(subject="수학", lesson_count=5)
+    slot = blueprint[0]
+    # _SlotResponse는 strict max_length=5라 6개는 검증 실패한다.
+    # 정상 경로의 상한은 5개라서 5개 입력이 5개로 남는지 본다.
+    items = [
+        {
+            "order": slot.order,
+            "stage": slot.stage,
+            "title": "제목",
+            "summary": "요약",
+            "learning_goal": "목표",
+            "key_topics": ["a", "b", "c", "d", "e"],
+        }
+    ]
+    sr = _parse_and_validate(_to_json(items), blueprint)[0]
+
+    lesson = _slot_response_to_lesson(sr, slot)
+
+    assert len(lesson["key_topics"]) == 5
+    assert lesson["key_topics"] == ["a", "b", "c", "d", "e"]
+
+
+def test_slot_to_lesson_slide_and_minutes_in_range() -> None:
+    """slide_count·estimated_minutes는 블루프린트 값을 범위 내로 유지한다."""
+    blueprint = build_curriculum_blueprint(subject="물리", lesson_count=10)
+    slot = blueprint[3]
+    items = [_slot_item(slot)]
+    sr = _parse_and_validate(_to_json(items), blueprint)[0]
+
+    lesson = _slot_response_to_lesson(sr, slot)
+
+    assert 10 <= lesson["slide_count"] <= 15
+    assert 20 <= lesson["estimated_minutes"] <= 60
+
+
+@pytest.mark.asyncio
+async def test_repair_recovers_only_missing_slots() -> None:
+    """3개만 받은 상태에서 부족슬롯[4,5]만 재요청해 5개로 복구한다.
+
+    - connector.generate가 정확히 1회만 추가 호출(repair)되는지
+    - 재요청 프롬프트에 부족 슬롯(4,5)만 담기고 전체 재생성이 아닌지
+    """
+    n = 5
+    blueprint = build_curriculum_blueprint(subject="생물", lesson_count=n)
+    received_items = [_slot_item(s) for s in blueprint[:3]]
+    received = _parse_and_validate(_to_json(received_items), blueprint)
+    assert len(received) == 3
+
+    repair_items = [_slot_item(s) for s in blueprint[3:]]
+    connector = _RecordingConnector([_resp(_to_json(repair_items))])
+
+    result = await _repair_missing_slots(
+        connector, topic="유전과 진화", subject="생물", blueprint=blueprint, received=received
+    )
+
+    assert len(result) == n, f"복구 실패 — len={len(result)}"
+    assert [r.order for r in result] == [1, 2, 3, 4, 5]
+
+    # repair만 따로 부르므로 호출은 1회다(전체 흐름이면 최초+repair 2회).
+    assert len(connector.calls) == 1, f"repair 호출 횟수={len(connector.calls)} != 1"
+
+    # 프롬프트에는 부족한 order 4,5만 담기고 order 1,2,3 슬롯 명세는 없다.
+    prompt = connector.calls[0].user
+    assert '"order":4' in prompt and '"order":5' in prompt, "부족 슬롯 4,5가 프롬프트에 없다"
+    # 전체 재생성이 아니므로 "전체 강의 수: 2개"처럼 부족분 개수만 적힌다.
+    assert "전체 강의 수: 2개" in prompt, "부족 슬롯만이 아니라 전체를 재요청하고 있다"
+
+
+@pytest.mark.asyncio
+async def test_repair_noop_when_nothing_missing() -> None:
+    """부족 슬롯이 없으면 비용이 들지 않게 AI 호출 없이 그대로 반환한다."""
+    n = 3
+    blueprint = build_curriculum_blueprint(subject="수학", lesson_count=n)
+    all_items = [_slot_item(s) for s in blueprint]
+    received = _parse_and_validate(_to_json(all_items), blueprint)
+    assert len(received) == n
+
+    connector = _RecordingConnector([])  # 응답을 넣지 않아 호출되면 IndexError가 난다.
+
+    result = await _repair_missing_slots(
+        connector, topic="t", subject="수학", blueprint=blueprint, received=received
+    )
+
+    assert len(result) == n
+    assert len(connector.calls) == 0, "부족 슬롯이 없는데 AI를 호출했다"
+
+
+@pytest.mark.asyncio
+async def test_plan_with_blueprint_happy_path(monkeypatch) -> None:
+    """N개가 정확히 오면 재요청 없이 1회 호출로 lessons N개를 반환한다."""
+    n = 10
+    blueprint = build_curriculum_blueprint(subject="통계", lesson_count=n)
+    full_items = [_slot_item(s) for s in blueprint]
+    connector = _RecordingConnector([_resp(_to_json(full_items))])
+
+    monkeypatch.setattr(
+        "app.modules.ChapterStudio_V1.app.curriculum_generate.get_planner_connector",
+        lambda: connector,
+    )
+    monkeypatch.setattr(
+        "app.modules.ChapterStudio_V1.app.curriculum_generate.build_curriculum_blueprint",
+        lambda **kw: blueprint,
+    )
+
+    course = {
+        "id": "c1",
+        "user_id": "u1",
+        "course_name": "통계 과외",
+        "subject": "통계",
+        "source_type": "topic",
+        "source_pdf_url": None,
+        "topic_text": "통계 추론",
+    }
+
+    lessons = await _plan_with_blueprint(course, "통계", n)
+
+    assert len(lessons) == n
+    assert [l["order"] for l in lessons] == list(range(1, n + 1))
+    for lesson in lessons:
+        assert set(lesson.keys()) == _EXPECTED_LESSON_KEYS
+        assert 3 <= len(lesson["key_topics"]) <= 5
+
+    assert len(connector.calls) == 1, f"happy-path 호출 횟수={len(connector.calls)} != 1"
+
+
+@pytest.mark.asyncio
+async def test_plan_with_blueprint_recovers_via_repair(monkeypatch) -> None:
+    """최초 N-2개를 받으면 repair로 부족분을 채워 N개가 되고 connector는 2회 호출된다."""
+    n = 5
+    blueprint = build_curriculum_blueprint(subject="화학", lesson_count=n)
+    first_items = [_slot_item(s) for s in blueprint[: n - 2]]  # 3개
+    repair_items = [_slot_item(s) for s in blueprint[n - 2 :]]  # 2개
+    connector = _RecordingConnector(
+        [_resp(_to_json(first_items)), _resp(_to_json(repair_items))]
+    )
+
+    monkeypatch.setattr(
+        "app.modules.ChapterStudio_V1.app.curriculum_generate.get_planner_connector",
+        lambda: connector,
+    )
+    monkeypatch.setattr(
+        "app.modules.ChapterStudio_V1.app.curriculum_generate.build_curriculum_blueprint",
+        lambda **kw: blueprint,
+    )
+
+    course = {
+        "id": "c2",
+        "user_id": "u1",
+        "course_name": "화학 과외",
+        "subject": "화학",
+        "source_type": "topic",
+        "source_pdf_url": None,
+        "topic_text": "화학 반응",
+    }
+
+    lessons = await _plan_with_blueprint(course, "화학", n)
+
+    assert len(lessons) == n
+    assert [l["order"] for l in lessons] == [1, 2, 3, 4, 5]
+    assert len(connector.calls) == 2, f"호출 횟수={len(connector.calls)} != 2"
+
+
+# codex --output-schema는 최상위 object만 받아 배열을 slots로 감싼다.
+# 그래서 파서가 slots 키를 직접 읽는다.
+
+
+def test_extract_slots_list_codex_wrapped() -> None:
+    """codex 경로: {"slots":[...]} 객체에서 slots 배열을 명시적으로 추출한다."""
+    n = 5
+    blueprint = build_curriculum_blueprint(subject="수학", lesson_count=n)
+    items = [_slot_item(s) for s in blueprint]
+    codex_output = json.dumps({"slots": items}, ensure_ascii=False)
+
+    raw_items = _extract_slots_list(codex_output)
+
+    assert raw_items is not None
+    assert isinstance(raw_items, list)
+    assert len(raw_items) == n, f"slots 배열 길이 불일치 — {len(raw_items)} != {n}"
+
+
+def test_extract_slots_list_opus_bare_array() -> None:
+    """opus 경로: bare array [...] 를 직접 추출한다."""
+    n = 5
+    blueprint = build_curriculum_blueprint(subject="과학", lesson_count=n)
+    items = [_slot_item(s) for s in blueprint]
+    opus_output = json.dumps(items, ensure_ascii=False)
+
+    raw_items = _extract_slots_list(opus_output)
+
+    assert raw_items is not None
+    assert isinstance(raw_items, list)
+    assert len(raw_items) == n
+
+
+def test_parse_codex_wrapped_produces_n_slots() -> None:
+    """codex 래핑 형태 {"slots":[...]}를 _parse_and_validate가 N슬롯으로 파싱한다."""
+    n = 7
+    blueprint = build_curriculum_blueprint(subject="영어", lesson_count=n)
+    items = [_slot_item(s) for s in blueprint]
+    codex_output = json.dumps({"slots": items}, ensure_ascii=False)
+
+    result = _parse_and_validate(codex_output, blueprint)
+
+    assert len(result) == n, f"codex 래핑 파싱 실패 — len={len(result)}, 예상={n}"
+    assert [r.order for r in result] == list(range(1, n + 1))
+
+
+def test_parse_codex_wrapped_multi_slots_full_validation() -> None:
+    """codex 래핑 형태 10슬롯도 order·stage·필드를 모두 대조한다."""
+    n = 10
+    blueprint = build_curriculum_blueprint(subject="물리", lesson_count=n)
+    items = [_slot_item(s) for s in blueprint]
+    codex_output = json.dumps({"slots": items}, ensure_ascii=False)
+
+    result = _parse_and_validate(codex_output, blueprint)
+
+    assert len(result) == n
+    for sr in result:
+        bp_slot = next(s for s in blueprint if s.order == sr.order)
+        assert sr.stage == bp_slot.stage, f"order={sr.order} stage 불일치"
+        assert 3 <= len(sr.key_topics) <= 5
+
+
+def test_parse_codex_wrapped_stage_tampered_drops_slot() -> None:
+    """codex 래핑 형태에서 stage 변조 슬롯은 동일하게 drop된다."""
+    n = 5
+    blueprint = build_curriculum_blueprint(subject="역사", lesson_count=n)
+    items = [_slot_item(s) for s in blueprint]
+    items[1]["stage"] = "변조된단계"  # order=2 슬롯의 stage를 바꾼다.
+    codex_output = json.dumps({"slots": items}, ensure_ascii=False)
+
+    result = _parse_and_validate(codex_output, blueprint)
+
+    assert len(result) == n - 1, f"변조 슬롯 drop 실패 — len={len(result)}"
+    assert 2 not in [r.order for r in result]
+
+
+def test_parse_codex_wrapped_empty_slots_array() -> None:
+    """codex 래핑이지만 slots가 빈 배열이면 빈 리스트를 반환한다."""
+    n = 5
+    blueprint = build_curriculum_blueprint(subject="화학", lesson_count=n)
+    codex_output = json.dumps({"slots": []}, ensure_ascii=False)
+
+    result = _parse_and_validate(codex_output, blueprint)
+
+    assert result == [], f"빈 slots 배열 처리 실패 — {result}"
+
+
+def test_extract_slots_list_unknown_wrapper_key_falls_to_substring() -> None:
+    """알 수 없는 래퍼 키(예: 'data')는 substring fallback으로 내부 배열을 추출한다."""
+    items = [{"order": 1, "stage": "관점 잡기"}]
+    raw = json.dumps({"data": items}, ensure_ascii=False)
+
+    result = _extract_slots_list(raw)
+
+    # substring fallback이 내부 배열 '[{...}]'를 잡는다.
+    assert result is not None
+    assert isinstance(result, list)
+    assert len(result) == 1
+
+
+def test_extract_slots_list_garbage_returns_none() -> None:
+    """JSON이 아닌 쓰레기 입력은 None을 반환한다."""
+    for garbage in ["", "   ", "쓰레기 텍스트", "not-json-at-all"]:
+        assert _extract_slots_list(garbage) is None, f"garbage {garbage!r} 가 None이 아님"
+
+
+@pytest.mark.asyncio
+async def test_plan_with_blueprint_codex_wrapped_happy_path(monkeypatch) -> None:
+    """codex 래핑 형태 응답으로 _plan_with_blueprint가 N개 레슨을 정상 반환한다."""
+    n = 5
+    blueprint = build_curriculum_blueprint(subject="생물", lesson_count=n)
+    items = [_slot_item(s) for s in blueprint]
+    codex_output = json.dumps({"slots": items}, ensure_ascii=False)
+    connector = _RecordingConnector([_resp(codex_output)])
+
+    monkeypatch.setattr(
+        "app.modules.ChapterStudio_V1.app.curriculum_generate.get_planner_connector",
+        lambda: connector,
+    )
+    monkeypatch.setattr(
+        "app.modules.ChapterStudio_V1.app.curriculum_generate.build_curriculum_blueprint",
+        lambda **kw: blueprint,
+    )
+
+    course = {
+        "id": "c3",
+        "user_id": "u1",
+        "course_name": "생물 과외",
+        "subject": "생물",
+        "source_type": "topic",
+        "source_pdf_url": None,
+        "topic_text": "세포 분열",
+    }
+
+    lessons = await _plan_with_blueprint(course, "생물", n)
+
+    assert len(lessons) == n, f"codex 래핑 happy-path 실패 — len={len(lessons)}, 예상={n}"
+    assert [l["order"] for l in lessons] == list(range(1, n + 1))
+    for lesson in lessons:
+        assert set(lesson.keys()) == _EXPECTED_LESSON_KEYS
+    assert len(connector.calls) == 1
+
+
+def test_learning_topics_for_blueprint_prefers_user_topic_over_subject() -> None:
+    assert _learning_topics_for_blueprint("파이썬 기초", "토익") == ["파이썬 기초"]
+    assert _learning_topics_for_blueprint("  파이썬 기초 ", "토익") == ["파이썬 기초"]
+    assert _learning_topics_for_blueprint("", "토익") is None
+    assert _learning_topics_for_blueprint("토익", "토익") is None
+
+
+def test_blueprint_topic_scope_uses_learning_topic_when_subject_differs() -> None:
+    """온보딩: 관심=토익, 주제=파이썬 기초일 때 topic_scope가 토익이 아닌 파이썬 기초를 따른다."""
+    topics = _learning_topics_for_blueprint("파이썬 기초", "토익")
+    slots = build_curriculum_blueprint(subject="토익", lesson_count=6, detected_topics=topics)
+    for slot in slots:
+        assert "파이썬 기초" in slot.topic_scope
+        assert "토익 기초" not in slot.topic_scope
+
+
+@pytest.mark.asyncio
+async def test_plan_with_blueprint_prompt_mentions_user_topic_not_subject_scope(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """_plan_with_blueprint가 블루프린트 topic_scope에 학습 주제를 반영한다."""
+    n = 4
+    blueprint = build_curriculum_blueprint(
+        subject="토익",
+        lesson_count=n,
+        detected_topics=_learning_topics_for_blueprint("파이썬 기초", "토익"),
+    )
+    connector = _RecordingConnector([_resp(_to_json([_slot_item(s) for s in blueprint]))])
+    monkeypatch.setattr(
+        "app.modules.ChapterStudio_V1.app.curriculum_generate.get_planner_connector",
+        lambda: connector,
+    )
+
+    course = {
+        "id": "course-onboard",
+        "user_id": "user-1",
+        "course_name": "파이썬 기초",
+        "subject": "토익",
+        "source_type": "topic",
+        "source_pdf_url": None,
+        "topic_text": "파이썬 기초",
+    }
+
+    await _plan_with_blueprint(course, "토익", n)
+
+    prompt = connector.calls[0].user
+    assert "주제: 파이썬 기초" in prompt
+    assert "파이썬 기초" in prompt
+    assert "토익 기초" not in prompt

@@ -1,0 +1,64 @@
+# backend-fastapi 로컬 개발용 compose
+# 사전 조건: infra 레포의 scripts/dev-up.sh로 sw-ez-shared 네트워크와 postgres/redis/qdrant 기동 완료 상태
+# 같은 이미지(sw-ez-team/backend-fastapi:local)를 3개 컨테이너가 같이 쓴다
+
+name: sw-ez-fastapi
+
+networks:
+  sw-ez-shared:
+    external: true
+
+# 3개 서비스 공통 설정
+x-fastapi-common: &fastapi-common
+  build:
+    context: .
+    dockerfile: Dockerfile
+  image: sw-ez-team/backend-fastapi:local
+  env_file:
+    - .env
+  environment:
+    AGENT_JOB_STORE: ${AGENT_JOB_STORE:-redis}
+    AGENT_JOB_STORE_STRICT: ${AGENT_JOB_STORE_STRICT:-1}
+    AGENT_JOB_EXECUTOR: ${AGENT_JOB_EXECUTOR:-celery}
+    MEDIA_ROOT_DIR: ${MEDIA_ROOT_DIR:-/app/media}
+  volumes:
+    - fastapi-media:/app/media
+  restart: unless-stopped
+  networks:
+    - sw-ez-shared
+
+services:
+  # FastAPI API 서버
+  api:
+    <<: *fastapi-common
+    container_name: sw-ez-backend-fastapi-api
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+    ports:
+      - "8000:8000"
+    healthcheck:
+      # 표준 라이브러리 urllib 만으로 헬스 체크한다
+      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8000/health\")' || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # Celery 비동기 태스크 워커
+  worker:
+    <<: *fastapi-common
+    container_name: sw-ez-backend-fastapi-worker
+    # Kanana CPU 추론이 워커마다 모델을 올리므로 동시 워커를 2개로 제한한다
+    command: ["celery", "-A", "app.celery_app", "worker", "-l", "info", "--concurrency", "2"]
+    depends_on:
+      - api
+
+  # Celery 주기적 스케줄러 (beat)
+  beat:
+    <<: *fastapi-common
+    container_name: sw-ez-backend-fastapi-beat
+    command: ["celery", "-A", "app.celery_app", "beat", "-l", "info"]
+    depends_on:
+      - api
+
+volumes:
+  fastapi-media:

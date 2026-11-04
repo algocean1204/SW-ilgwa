@@ -1,0 +1,25 @@
+[build-system]
+requires = ["maturin>=1.7,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "lib_rust"
+version = "0.1.0"
+description = "OCR 전처리용 PyO3 Rust 라이브러리 (FastAPI VM in-process 소비)"
+requires-python = ">=3.12,<3.13"
+license = { text = "MIT OR Apache-2.0" }
+authors = [{ name = "SW-EZ-Team" }]
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: Implementation :: CPython",
+]
+
+[tool.maturin]
+# PyO3 바인딩 + Python 3.12 ABI 고정
+bindings = "pyo3"
+features = ["pyo3/extension-module"]
+# Rust 프로젝트 루트를 pyproject.toml 과 동일 폴더로 둔다
+manifest-path = "Cargo.toml"
+# 배포용 strip 옵션
+strip = true
