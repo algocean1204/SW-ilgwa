@@ -169,4 +169,4 @@ npm i && npm run build && npm run preview
 
 ## 라이선스
 
-[Apache License 2.0](LICENSE)
+[GNU AGPL-3.0](LICENSE). 교재 OCR에 쓰는 MinerU(AGPL-3.0)와 Marker(GPL-3.0)의 조건에 맞춰 AGPL-3.0으로 공개합니다. Rust 확장 모듈(`project/lib-rust`)은 Apache License 2.0입니다.
