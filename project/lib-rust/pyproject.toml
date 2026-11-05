@@ -7,7 +7,7 @@ name = "lib_rust"
 version = "0.1.0"
 description = "OCR 전처리용 PyO3 Rust 라이브러리 (FastAPI VM in-process 소비)"
 requires-python = ">=3.12,<3.13"
-license = { text = "MIT OR Apache-2.0" }
+license = { text = "Apache-2.0" }
 authors = [{ name = "SW-EZ-Team" }]
 classifiers = [
     "Programming Language :: Rust",
