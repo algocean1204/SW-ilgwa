@@ -96,4 +96,4 @@ paddle2onnx --model_dir korean_PP-OCRv5_mobile_rec_infer \
 | onnxruntime | MIT | 허용 |
 
 PyMuPDF(AGPL-3.0)는 의존 경로에 넣지 않는다.
-PDF 래스터화는 lib-rust(pdfium/BSD) 또는 pypdfium2(Apache 2.0/BSD)로 한다.
+PDF 래스터화는 pypdfium2(Apache 2.0/BSD)로 한다.
