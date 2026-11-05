@@ -164,3 +164,9 @@ npm i && npm run build && npm run preview
 |---|---|
 | 김태규 | AI 아키텍처, FastAPI 추론 서버, LangGraph, Modal GPU, RAG 구축 |
 | 김나경 | Spring Boot 서비스 서버, AWS 인프라 배포 |
+
+<hr>
+
+## 라이선스
+
+[Apache License 2.0](LICENSE)
