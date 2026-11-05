@@ -4,14 +4,14 @@
 
 가이드, 학습, 복습을 한 곳에서 할 수 있도록 만들었습니다. 2026년 4월부터 6월까지 2인 팀으로 개발했습니다.
 
-[![Demo](https://img.shields.io/badge/demo-바로_열기-3182F6?style=flat-square)](https://algocean1204.github.io/SW-ilgwa/)
-[![HF Model](https://img.shields.io/badge/HuggingFace-algocean--2.1B--nano--friend-FFD21E?style=flat-square&logo=huggingface&logoColor=black)](https://huggingface.co/aisamdasu/algocean-2.1B-nano-friend)
+[![서비스](https://img.shields.io/badge/서비스-바로_열기-3182F6?style=for-the-badge)](https://algocean1204.github.io/SW-ilgwa/)
+[![HF Model](https://img.shields.io/badge/HuggingFace-algocean--2.1B--nano--friend-FFD21E?style=for-the-badge&logo=huggingface&logoColor=black)](https://huggingface.co/aisamdasu/algocean-2.1B-nano-friend)
 
 | 학습실 | 실전 모의고사 |
 |---|---|
 | ![메인 화면](docs/screens/01-home.png) | ![모의고사](docs/screens/05-exam.png) |
 
-데모는 로그인 없이 바로 열립니다. 파이썬, Rust, 운영체제 3과목의 슬라이드, 음성 수업, 모의고사, 암기노트, 과제가 들어 있습니다. 서버 없이 브라우저에서만 동작하는 정적 데모라서 새 강의와 시험을 만드는 기능은 꺼 두었습니다.
+서비스는 로그인 없이 바로 열립니다. 파이썬, Rust, 운영체제 3과목의 슬라이드, 음성 수업, 모의고사, 암기노트, 과제가 들어 있습니다. 서버 없이 브라우저에서만 동작하는 정적 서비스라서 새 강의와 시험을 만드는 기능은 꺼 두었습니다.
 
 <hr>
 
@@ -21,7 +21,6 @@
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 ![Java](https://img.shields.io/badge/Java_21-007396?style=for-the-badge&logo=openjdk&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
-![Rust](https://img.shields.io/badge/Rust-000000?style=for-the-badge&logo=rust&logoColor=white)
 
 ### Framework & Runtime
 ![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)
@@ -127,9 +126,8 @@ project/
 ├── backend-fastapi/     AI 추론 서버 (FastAPI, LangGraph, Celery)
 ├── backend-spring/      서비스 API 서버 (Spring Boot)
 ├── frontend-web/        웹 클라이언트 (React, Vite)
-├── portfolio-showcase/  정적 데모 (React, MSW)
+├── portfolio-showcase/  정적 서비스 (React, MSW)
 ├── infra/               로컬 실행용 Docker Compose, DB 스키마
-├── lib-rust/            PDF·이미지 전처리 확장 모듈 (PyO3)
 ├── benchmarks/          OCR·검색·TTS 측정 스크립트
 └── Docs/                설계 문서 (아키텍처, API, ERD, 실측)
 ```
@@ -151,7 +149,7 @@ cd ../backend-fastapi
 uv run uvicorn main:app --reload
 uv run celery -A app.celery_app worker --loglevel=info --concurrency 2
 
-# 정적 데모
+# 정적 서비스
 cd ../portfolio-showcase
 npm i && npm run build && npm run preview
 ```
@@ -164,9 +162,3 @@ npm i && npm run build && npm run preview
 |---|---|
 | 김태규 | AI 아키텍처, FastAPI 추론 서버, LangGraph, Modal GPU, RAG 구축 |
 | 김나경 | Spring Boot 서비스 서버, AWS 인프라 배포 |
-
-<hr>
-
-## 라이선스
-
-[GNU AGPL-3.0](LICENSE). 교재 OCR에 쓰는 MinerU(AGPL-3.0)와 Marker(GPL-3.0)의 조건에 맞춰 AGPL-3.0으로 공개합니다. Rust 확장 모듈(`project/lib-rust`)은 Apache License 2.0입니다.
