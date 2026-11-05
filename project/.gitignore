@@ -71,7 +71,6 @@ Docs/server-operations.md
 Docs/메인강의생성/변경이력_*.md
 Docs/기능/*_결정.md
 Docs/API명세서/계약결정사항.md
-lib-rust/요청사항.md
 **/docs/deployment-env-checklist.md
 **/.github/workflows/cd-*.yml
 frontend-web/docs/디자인점검_*.md

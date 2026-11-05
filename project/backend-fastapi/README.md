@@ -48,7 +48,7 @@ FastAPI     → Modal GPU / Claude API / Qdrant
 FastAPI     → RDS·S3 (생성 결과 적재), Spring 콜백
 ```
 
-PDF 래스터화는 lib-rust PyO3 휠이 설치돼 있으면 그 경로를, 없으면 pypdfium2를 쓴다.
+PDF 래스터화는 pypdfium2를 쓴다.
 
 ---
 
@@ -67,7 +67,7 @@ Telegram API 호출과 웹훅 수신은 FastAPI가 한다. 공개 웹훅 경로�
 ### 자동 승인 로직
 
 - 새 `chat_id`를 어느 유저에게 붙일지(인증 코드, 전화번호 매칭, 수동 승인 등)는 아직 정하지 않았다.
-- 어떤 방식이든 승인 로직은 FastAPI 안에서 처리한다. Spring·Rust는 관여하지 않는다.
+- 어떤 방식이든 승인 로직은 FastAPI 안에서 처리한다. Spring은 관여하지 않는다.
 
 개념 스케치(미확정): 아직 유저에 붙지 않은 chat_id는 `telegram_account_pending` 임시 테이블이나 Redis 큐에 잠시 넣고, 관리자 승인이나 자동 매칭(인증 코드·전화번호 비교 등)으로 최종 유저에 붙이는 방식을 생각하고 있다. 적재 방식·테이블 스키마·매칭 알고리즘은 FastAPI 담당자가 정한다.
 
@@ -99,7 +99,6 @@ DB 등 의존 서비스는 infra 레포의 docker-compose로 먼저 띄운다.
 | 레포 | 역할 |
 |---|---|
 | [backend-spring](https://github.com/SW-EZ-Team/backend-spring) | 메인 백엔드 (REST API·비즈니스 로직·인증·결제) |
-| [lib-rust](https://github.com/SW-EZ-Team/lib-rust) | PDF 래스터화 PyO3 Rust 라이브러리 (wheel) |
 | [infra](https://github.com/SW-EZ-Team/infra) | 로컬 DB 서버 묶음 (PostgreSQL·Redis·Qdrant) |
 
 ---

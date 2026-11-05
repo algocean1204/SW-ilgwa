@@ -7,8 +7,6 @@
 > 상태 (2026-06-07): 이 스펙의 폴더 구조·레지스트리는 실제 `backend-fastapi/ai_connectors/`와 일부 다르다. MLX 로컬 커넥터(`mlx_whisper_turbo_connector.py`, `sensevoice_small_connector.py`, TTS MLX 등)는 제거했다. 이 문서는 커넥터 패턴의 설계 원칙으로 남기고, 실제 등록 커넥터 목록은 `backend-fastapi/ai_connectors/_registry_*.py`를 기준으로 한다.
 >
 > 최종 기본 경로 (2026-11-02): ASR은 `whisper-modal`(Whisper V3 Turbo, Modal 앱 `asr-whisper-v3-turbo`)이고 `gemini-asr`는 `ASR_GEMINI_FALLBACK=true`일 때만 쓴다. TTS는 `qwen3-tts-modal`(Qwen3-TTS, Modal H100)이다. 텍스트 생성은 Modal Qwen3.6-27B FP8이 실패하면 Claude로 넘어간다. TTS·ASR·임베딩은 Claude에 해당 API가 없어 Claude 폴백이 없다. 아래 §5 코드의 Gemini 기본값은 2026-06-07 시점 기록이다.
-> 관련 문서:
-> - [`lib-rust_PyO3_경계.md`](./lib-rust_PyO3_경계.md): OCR 커넥터가 쓰는 lib-rust 인터페이스
 
 ---
 
@@ -319,39 +317,7 @@ print(response.content)
 
 ---
 
-## 9. OCR 커넥터와 lib-rust 연결
-
-OCR 커넥터는 다른 모달리티와 달리 추론 전에 lib-rust 전처리를 거친다. 아래 PaddleOCR ONNX 예시는 2026-04-19 이전 설계이며, 현행 OCR은 OCR_V1(아래 OCR_v1 절)이다.
-
-```python
-# ai_connectors/ocr/paddleocr_onnx_cpu_connector.py 구조
-
-import lib_rust  # PyO3 wheel
-import onnxruntime as ort
-
-class PaddleOcrOnnxConnector:
-    def __init__(self):
-        # 앱 기동 시 1회만 세션 초기화
-        self._det_session = ort.InferenceSession("models/ocr/paddle/det.onnx")
-        self._rec_session = ort.InferenceSession("models/ocr/paddle/rec.onnx")
-        self._cls_session = ort.InferenceSession("models/ocr/paddle/cls.onnx")
-
-    async def extract_text(self, image: np.ndarray, **opts) -> OcrResponse:
-        # 1. lib-rust 전처리 (PyO3 호출)
-        preprocessed = lib_rust.preprocess_image(image, target_h=640)
-
-        # 2. ONNX 추론 (CPU)
-        det_out = self._det_session.run(None, {"input": preprocessed})[0]
-        # ... rec, cls 추론
-        text = self._postprocess(det_out, ...)
-        return OcrResponse(text=text)
-```
-
-lib-rust API 상세는 [`lib-rust_PyO3_경계.md`](./lib-rust_PyO3_경계.md)에 있다.
-
----
-
-## 10. OCR_v1 Protocol 기반 설계 — ai_connectors 패턴과의 공존
+## 9. OCR_v1 Protocol 기반 설계 — ai_connectors 패턴과의 공존
 
 OCR_v1은 기존 `ai_connectors/` 패턴과 다른 접근 방식을 사용한다. 기존 커넥터는 `AIConnector` 단일 Protocol로 벤더를 추상화하지만, OCR_v1은 **기능 단위별 Protocol 5개**로 파이프라인 각 단계를 독립적으로 추상화한다.
 
@@ -447,7 +413,7 @@ OCR_v1은 독립 모듈이지만 기존 `registry.py`에 엔트리 포인트를 
 
 | 항목 | `ocr/paddleocr_onnx_cpu_connector.py` | OCR_v1 |
 |---|---|---|
-| 용도 | ①b 참고도서 OCR (lib-rust PyO3 전처리 포함) | ①c 범용 PDF OCR (독립 파이프라인) |
+| 용도 | ①b 참고도서 OCR | ①c 범용 PDF OCR (독립 파이프라인) |
 | 추상화 단위 | 단일 `OcrConnector` Protocol | 기능별 5-Protocol |
 | 폴백 전략 | 없음 (단일 경로) | MinerU 자동 폴백 (품질 게이트 실패 시) |
 | 벡터 저장 | `book_chunks` 컬렉션 (dense only) | `ocr_v1_chunks` 컬렉션 (dense + sparse) |
@@ -457,9 +423,9 @@ OCR_v1은 독립 모듈이지만 기존 `registry.py`에 엔트리 포인트를 
 
 ---
 
-## 11. ASR 커넥터 확장 — SenseVoice-Small 및 LangGraph 2-tier 폴백
+## 10. ASR 커넥터 확장 — SenseVoice-Small 및 LangGraph 2-tier 폴백
 
-### 11-1. SenseVoice-Small 커넥터
+### 10-1. SenseVoice-Small 커넥터
 
 `sensevoice_small_connector.py`는 [Blaizzy/mlx-audio](https://github.com/Blaizzy/mlx-audio)의 `stt.models.sensevoice` 래퍼다. 로컬 Mac 전용이며, 속도 우선 시나리오(실시간 자막 등)에 적합하다.
 
@@ -528,7 +494,7 @@ class SenseVoiceSmallConnector:
 
 ---
 
-### 11-2. ASR Fallback — LangGraph 2-tier 자동 폴백
+### 10-2. ASR Fallback — LangGraph 2-tier 자동 폴백
 
 `fallback/` 서브패키지는 LangGraph `StateGraph` 기반 tier 자동 폴백 커넥터다. `ASRConnector` Protocol과 동일한 시그니처를 구현하므로 호출부 변경 없이 교체할 수 있다.
 
@@ -601,7 +567,7 @@ class FallbackASRConnector:
 
 ---
 
-## 12. TTS V2 오디오북 파이프라인 — ai_connectors 패턴과의 공존
+## 11. TTS V2 오디오북 파이프라인 — ai_connectors 패턴과의 공존
 
 TTS V2는 기존 `ai_connectors/tts/` 커넥터를 내부적으로 소비하는 **상위 파이프라인 모듈**이다. 텍스트·마크다운 입력을 받아 오디오북 품질의 WAV를 출력한다.
 
@@ -654,7 +620,7 @@ load_input → clean_text → plan_reading → chunk_text → synthesize → pos
 
 ---
 
-## 13. TTS 커넥터 내부 ASR 의존성 주입
+## 12. TTS 커넥터 내부 ASR 의존성 주입
 
 Qwen3-TTS는 `ref_audio + ref_text + target_text` 3-입력 방식이다. `ref_text`는 `ref_audio`를 Qwen3-ASR로 전사한 결과여야 한다. TTS 커넥터는 `ref_text`가 없을 때 ASR 커넥터를 직접 호출해 자동 생성한다.
 
@@ -739,7 +705,7 @@ def get_tts_connector() -> Qwen3TtsMlxConnector:
 
 | 날짜 | 버전 | 내용 |
 |---|---|---|
-| 2026-04-17 | v1.0 | 최초 작성. 문제 정의, 폴더 구조, Protocol 정의, schemas/registry/errors 코드 스니펫, 호출부 계약, 새 벤더 추가 체크리스트, OCR-lib-rust 연결 구조. |
+| 2026-04-17 | v1.0 | 최초 작성. 문제 정의, 폴더 구조, Protocol 정의, schemas/registry/errors 코드 스니펫, 호출부 계약, 새 벤더 추가 체크리스트. |
 | 2026-04-17 | v1.1 | §10 추가 — TTS 커넥터 내부 ASR 의존성 주입 예시 (Qwen3TtsMlxConnector, ref_text 자동 전사, x_vector_only_mode fallback 조건). get_tts_connector() registry 확장 패턴 추가. fastapi_ai_pipeline_spec.md §D-3 ②b 교차 참조 추가. |
 | 2026-04-17 | v1.2 | §10 TTS↔ASR 컴포지션 섹션 신규 공식화 — ref_text 자동 전사 패턴 명시. dangling cross-reference 해소 (fastapi_ai_pipeline_spec.md §D-3 ②b → §10 링크 유효화). |
 | 2026-04-23 | v1.3 | **§10 OCR_v1 Protocol 기반 설계 추가** — 기존 `paddleocr_onnx_cpu_connector.py` OCR 섹션 다음에 OCR_v1 독립 모듈 설계 서브섹션 신설. Protocol 5개 코드 스니펫, 폴더 구조, registry 등록 방법, 기존 커넥터와 비교 표 포함. 기존 §10(TTS-ASR)은 §11로 번호 변경. |

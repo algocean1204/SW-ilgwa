@@ -114,6 +114,5 @@ UID는 1001로 고정한다. 서비스별로 다른 UID를 쓰지 않는다.
 
 - `docker-templates/java.Dockerfile`
 - `docker-templates/python.Dockerfile`
-- `docker-templates/rust.Dockerfile`
 
 신규 서비스 Dockerfile 작성 시 해당 템플릿을 기반으로 시작한다.

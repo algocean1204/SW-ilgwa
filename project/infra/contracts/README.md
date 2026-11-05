@@ -10,7 +10,6 @@ SW-EZ-Team 서비스 간에 공유할 OpenAPI 스펙 파일을 두는 디렉토�
 ```
 contracts/
 ├── spring-api.yaml         # backend-spring REST API 스펙
-├── rust-api.yaml           # (deprecated) 과거 backend-rust gRPC·REST API 스펙. lib-rust는 PyO3 라이브러리라 네트워크 API가 없다
 └── fastapi-api.yaml        # backend-fastapi AI 파이프라인 API 스펙
 ```
 

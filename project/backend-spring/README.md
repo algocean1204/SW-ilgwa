@@ -20,7 +20,7 @@ REST API, 비즈니스 로직, 인증, 결제, 세션 관리를 맡는다. 외�
 ## 하지 않는 것
 
 - AI 추론·LLM 호출은 하지 않는다 (FastAPI에서 처리)
-- PDF/이미지 전처리는 하지 않는다 (FastAPI와 lib-rust에서 처리)
+- PDF/이미지 전처리는 하지 않는다 (FastAPI에서 처리)
 - SseEmitter 기반 실시간 스트리밍은 쓰지 않는다 (상태 조회는 REST)
 - OCR 모델을 직접 실행하지 않는다 (FastAPI에서 처리)
 
@@ -68,6 +68,5 @@ DB 등 의존 서비스는 infra 레포의 docker-compose로 먼저 기동한다
 
 | 레포 | 역할 |
 |---|---|
-| [lib-rust](https://github.com/SW-EZ-Team/lib-rust) | PDF/이미지 전처리 PyO3 라이브러리 |
 | [backend-fastapi](https://github.com/SW-EZ-Team/backend-fastapi) | AI 추론·OCR·채점 |
 | [infra](https://github.com/SW-EZ-Team/infra) | 로컬 DB 서버 묶음 (PostgreSQL·Redis·Qdrant) |

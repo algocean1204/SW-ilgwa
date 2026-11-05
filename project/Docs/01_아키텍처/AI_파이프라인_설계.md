@@ -65,7 +65,7 @@ OCR 경로는 두 갈래다.
 - LangGraph: `StateGraph` + `PostgresSaver` Checkpointer를 전면 적용한다. ②a(Voice Profile) Linear만 예외.
 - Checkpointer 네임스페이스 규칙: `{pipeline_id}:{user_id}:{session_id}`
 - SSE: AI 파이프라인(FastAPI) 범위 내 전역 금지. Spring Boot도 강의·알림 SseEmitter를 구현하지 않는다. ②c 질답+퀴즈 스트리밍은 2026-04-27에 폐기했다. Chat_V1 텍스트 채팅은 예외로 `POST /api/chat/v1/ask/stream`에서 SSE로 답변을 흘려보낸다(Claude Sonnet). `POST /api/chat/v1/ask`는 JSON으로 한 번에 응답한다.
-- 도메인 경계: AI 파이프라인·에이전트·SHM·Telegram 봇 라우터는 모두 FastAPI에 있다. Spring은 DB 쓰기와 콜백 수신만 한다. lib-rust PyO3는 PDF 래스터화(rasterize_pdf) 보조이며 별도 서버가 없다. ①a 과제는 Sonnet VLM이 직접 처리하고, 모든 PDF OCR은 OCR_V1을 거친다.
+- 도메인 경계: AI 파이프라인·에이전트·SHM·Telegram 봇 라우터는 모두 FastAPI에 있다. Spring은 DB 쓰기와 콜백 수신만 한다. ①a 과제는 Sonnet VLM이 직접 처리하고, 모든 PDF OCR은 OCR_V1을 거친다.
 - Qdrant는 RAG(의미 검색) 전용이며 SHM(구조화 사실·상태)과 분리된다.
 - WeakConceptLinker는 오답·부분이해일 때만 호출한다.
 
@@ -535,7 +535,7 @@ Telegram 웹훅이 학생 파일 제출을 감지하면 파이프라인이 시�
 | `.zip` | 압축 해제 → 포함 파일별 재귀 분기 | 프로젝트 제출 |
 | `.mp3` / `.m4a` / `.wav` | Whisper Turbo → 텍스트 변환 후 채점 | 구술 과제 |
 
-> 이미지·PDF(스캔)는 **Sonnet 4.6 VLM 직접 처리** 경로를 사용한다 (OCR 레이어 없음). 음성은 Whisper Turbo 경로를 사용한다. MarkItDown은 오피스 문서 계열(.docx/.pptx/.xlsx)에만 적용된다. 기존 `ilkwa_rust_ext` + PaddleOCR ONNX 경로는 ①a에서 2026-04-19 완전 제거됨.
+> 이미지·PDF(스캔)는 **Sonnet 4.6 VLM 직접 처리** 경로를 사용한다 (OCR 레이어 없음). 음성은 Whisper Turbo 경로를 사용한다. MarkItDown은 오피스 문서 계열(.docx/.pptx/.xlsx)에만 적용된다. 기존 PaddleOCR ONNX 경로는 ①a에서 2026-04-19 완전 제거됨.
 >
 > MarkItDown은 Microsoft가 MIT 라이선스로 공개한 변환 라이브러리다. 출력이 plain Markdown이라 Claude 입력에 그대로 넣는다.
 
@@ -997,7 +997,6 @@ L3 도메인 파일은 S3/MinIO에 `{user_id}/{category}.md` 형태로 저장한
 |---|---|---|
 | FastAPI | 전부 | 모든 AI 파이프라인, 에이전트, SHM, Telegram 봇 라우터, autoDream |
 | Spring | AI 호출 없음 | DB 쓰기와 FastAPI 콜백 수신만 |
-| Rust | AI 호출 없음 | PDF 래스터화·이미지 정규화 보조 (PyO3 FFI)만 한다 |
 
 ---
 
@@ -1007,7 +1006,6 @@ L3 도메인 파일은 S3/MinIO에 `{user_id}/{category}.md` 형태로 저장한
 
 - SHM autoDream(KAIROS) 데몬 상세 → [`Self-Healing_Memory_설계안.md`](./Self-Healing_Memory_설계안.md)
 - Spring↔FastAPI API 계약 → [`../02_API/Spring_API.md`](../02_API/Spring_API.md), [`../02_API/FastAPI_API.md`](../02_API/FastAPI_API.md)
-- Rust PyO3 FFI 인터페이스 → [`lib-rust_PyO3_경계.md`](./lib-rust_PyO3_경계.md)
 - `memory` 테이블 스키마 (L2 포인터 인덱스) → [`../03_데이터/ERD.md`](../03_데이터/ERD.md)
 - Telegram Bot 토큰 관리·보안 정책 → 미결
 - AssignmentMaker 마일스톤 트리거 조건 세부 → 미결
@@ -1019,7 +1017,6 @@ L3 도메인 파일은 S3/MinIO에 `{user_id}/{category}.md` 형태로 저장한
 | 문서 | 관련 섹션 |
 |---|---|
 | [`Self-Healing_Memory_설계안.md`](./Self-Healing_Memory_설계안.md) | SHM L1/L2/L3 아키텍처, autoDream(KAIROS) 데몬 정책, 구현 12항목 체크리스트 |
-| [`lib-rust_PyO3_경계.md`](./lib-rust_PyO3_경계.md) | Rust 전처리 PyO3 FFI 인터페이스. 초기 설계 이력은 부록에 있다 |
 | [`../02_API/FastAPI_API.md`](../02_API/FastAPI_API.md) | FastAPI 엔드포인트, Spring↔FastAPI 콜백 규약 |
 | [`../03_데이터/ERD.md`](../03_데이터/ERD.md) | `memory` 테이블 스키마. L2 포인터 인덱스가 이 테이블의 `content_json`에 저장된다 |
 
@@ -1031,7 +1028,7 @@ L3 도메인 파일은 S3/MinIO에 `{user_id}/{category}.md` 형태로 저장한
 |---|---|---|
 | 2026-04-14 | v2.0 | 최초 작성. 파이프라인 9개·에이전트 14개 확정. ContentWriter Sonnet 전환, ③ Daily Consolidation 재정의, ⑤⑥ 신규 파이프라인 추가. |
 | 2026-04-14 | v2.1 | ①a 재정의 — 독립 파이프라인 → ⑥ AssignmentGrader의 이미지·PDF 분기 전처리 경로로 재자리매김. ⑥ 파일 타입 라우팅 추가(이미지·PDF·음성·코드·서술·zip 6개 경로). 파일 형식 허용표 신규 삽입. SSE 범위 주석 명확화(AI 파이프라인 한정, Spring Boot 범위 외 명시). SHM 주입 매트릭스 ①a 각주 추가(⑥ 내부 호출 시 ⑥ SHM 전파). |
-| 2026-04-17 | v2.2 | 문서 동기화 — lib-rust PyO3 전환 + OCR ONNX-only + SSE 전역 미사용 반영. ①a/①b OCR을 Qwen-VL/Tesseract에서 ONNX Runtime (CPU) PaddleOCR 단일 경로로 교체. 모델 경로 표·mermaid 다이어그램 갱신. |
+| 2026-04-17 | v2.2 | 문서 동기화 — OCR ONNX-only + SSE 전역 미사용 반영. ①a/①b OCR을 Qwen-VL/Tesseract에서 ONNX Runtime (CPU) PaddleOCR 단일 경로로 교체. 모델 경로 표·mermaid 다이어그램 갱신. |
 | 2026-04-17 | v2.3 | ②b TTS 공식 파이프라인 확정 반영 — ref_audio + Qwen3-ASR-1.7B 자동 전사 → ref_text 생성 → Qwen3-TTS-Base(MLX/CUDA) 3-입력 방식. qwen3-tts-mlx-studio "Transcribe Reference" 방식과 동일임 명시. x_vector_only_mode fallback 허용 기준(화자 유사도 0.89→0.75) 명시. TTS cold/warm 지연 추가(~10.7s/~6.9s). D-9 모델 라우팅 표에서 Qwen-VL/Tesseract 제거 확정 반영. TTS 커넥터 ASR 의존성 교차 참조 추가(ai_connector_registry_spec.md §10). |
 | 2026-04-18 | v2.4 | OCR 아키텍처 보완 — ①a/①b 산출물 스펙 확정(JSON + plain text, overlay PDF 없음), VLM fallback 전략 추가(①a 과제 한정, conf < 0.70 시 메인 멀티모달 모델에 원본 전달), ①b는 단일 경로 유지. D-9 모델 라우팅 표에 VLM fallback 행 추가. |
 | 2026-04-19 | v2.5 | **교재 OCR + 과제 채점 Dual-path 아키텍처 확정** — CPU PP-OCRv5 ONNX 경로 완전 폐기. ①b 참고도서 OCR을 PaddleOCR-VL-1.5 Modal A10으로 전환 (Kanana-2 후처리 추가, ~₩763/책). ①a 과제 파일을 Sonnet 4.6 VLM 직접 처리로 변경 (OCR 레이어 제거). D-2 파이프라인 표, D-3 상세, D-9 모델 라우팅 표, D-6 채점 상세 전면 갱신. Dual-path 아키텍처 개요 섹션 신설. |
@@ -1086,12 +1083,10 @@ L3 도메인 파일은 S3/MinIO에 `{user_id}/{category}.md` 형태로 저장한
 
 | 항목 | 변경 내용 |
 |---|---|
-| ①a OCR 경로 폐기 | "PaddleOCR ONNX CPU + lib-rust PyO3 전처리 + conf < 0.70 VLM fallback" 단일 경로 완전 삭제. |
+| ①a OCR 경로 폐기 | "PaddleOCR ONNX CPU + conf < 0.70 VLM fallback" 단일 경로 완전 삭제. |
 | ①a 신규 경로 | Sonnet 4.6 VLM 직접 처리 (AssignmentGrader 내부). OCR 레이어 없음. |
 | ①b 신규 경로 | PaddleOCR-VL-1.5 Modal A10 + Kanana-2 2.1B MLX 4bit 후처리 + Sonnet 섹션 파싱. |
-| lib-rust 역할 범위 축소 | ①a 전처리 제거. ①b PDF 래스터화 전처리만 담당. |
 | 모델 라우팅 표 | PaddleOCR ONNX + VLM fallback 2행 → PaddleOCR-VL-1.5 + Sonnet VLM 2행으로 교체. |
-| 도메인 경계 설명 | "①a·①b" → "①b만" Rust 호출로 좁힘. |
 
 #### v2.1 (2026-04-14 3차)
 

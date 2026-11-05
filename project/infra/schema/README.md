@@ -12,8 +12,7 @@ schema/
 ├── migrations/        # Flyway 버전 마이그레이션
 └── reference-models/  # 각 서비스 ORM 매핑 참고용
     ├── java/
-    ├── python/
-    └── rust/
+    └── python/
 ```
 
 ---

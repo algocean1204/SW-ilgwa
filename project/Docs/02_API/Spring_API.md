@@ -57,7 +57,6 @@ FastAPI 한 서버에 AI 진입점을 모으고 LangGraph로 확장한다.
 
 - FastAPI가 모든 AI 진입점을 맡는다. OCR, Claude 채점, TTS 호출, 임베딩, LangGraph 에이전트를 FastAPI 레이어에 모은다.
 - 교재 OCR은 OCR_V1 한 경로다. Marker로 1차 추출하고 품질 게이트에 걸린 페이지만 MinerU로 다시 뽑아 Kanana-2로 교정한다. 과제 이미지·PDF는 Sonnet 4.6 VLM이 직접 읽는다.
-- lib-rust PyO3 라이브러리는 PDF 래스터화·이미지 정규화 보조로만 FastAPI 프로세스 안에서 호출한다. 별도 서버 프로세스가 없다.
 - SSE는 쓰지 않는다. ②c 소크라테스 토큰 스트리밍은 FastAPI StreamingResponse로 처리한다(SSE 프로토콜 아님). 예외는 FastAPI Chat_V1 `POST /api/chat/v1/ask/stream` 하나로, 채팅 답변을 SSE로 흘려보낸다.
 - Modal GPU는 FastAPI가 호출하는 외부 compute runtime이다. Qwen3.6-27B FP8·vLLM, Qwen3-TTS, Whisper V3 Turbo, BGE-M3·reranker를 돌린다.
 
@@ -3867,16 +3866,16 @@ Content-Type: image/jpeg
 
 ##### PDF 처리 경로
 
-PDF 렌더링·텍스트 추출은 Python `pypdfium2`에서 한다. Rust는 PDF 파싱에 관여하지 않는다.
+PDF 렌더링·텍스트 추출은 Python `pypdfium2`에서 한다.
 
 - 디지털 PDF(텍스트 레이어 존재) 감지 시 텍스트 레이어를 우선 추출하여 OCR을 스킵한다. 토큰·비용 절감 효과.
 - 스캔 PDF(이미지만 있음)나 텍스트 레이어가 빈 페이지는 300 DPI로 래스터화한 뒤 Sonnet 4.6 VLM에 넘긴다.
 - 일부 페이지만 텍스트가 있는 혼합 PDF는 페이지별로 분기 처리한다. 최종 출력은 페이지 순서대로 병합.
 - 텍스트 추출에 실패하거나 전체 빈 페이지인 경우 해당 페이지만 OCR 경로로 폴백.
 
-##### Rust 라이브러리 경계
+##### 검증 경계
 
-검증은 Python stdlib `zipfile`로만 한다. 검증을 통과한 이미지는 Sonnet 4.6 VLM이 직접 읽는다. Rust PyO3 라이브러리는 PDF 래스터화·이미지 정규화 보조만 하고, zip 파싱과 PDF 텍스트 추출은 하지 않는다. 2026-04-19 이전에는 `ilkwa_rust_ext.ocr_preprocessor.preprocess`(리사이즈·이진화·노이즈 제거) 후 PaddleOCR ONNX로 읽었다. 상세는 `Docs/01_아키텍처/lib-rust_PyO3_경계.md`.
+검증은 Python stdlib `zipfile`로만 한다. 검증을 통과한 이미지는 Sonnet 4.6 VLM이 직접 읽는다. 2026-04-19 이전에는 PaddleOCR ONNX로 읽었다.
 
 ---
 
@@ -6344,14 +6343,14 @@ AI 코인 1개를 사용하여 모의고사를 생성한다. `POST /exam-forges`
 |------|------|-----------|
 | 2026-04-15 | 2.0.8 | 봇 username 불일치 수정 (`ilkwa_bot` → `ilgwa_EZ_Team_bot`). 관리자 전용 API 섹션(§ 18) 신설 — F16.1·F16.2·F16.3 예비 stub 5개 엔드포인트. |
 | 2026-04-12 | 2.0.0 | 초기 작성 |
-| 2026-04-14 | 2.0.1 | Rust Actix-web 서버(ocr.ilkwa.com) 제거. OCR 전처리·오케스트레이션을 FastAPI 내 `ilkwa_rust_ext` PyO3 라이브러리 흡수 방식으로 전환. AI 스트리밍 경계를 FastAPI 중심으로 정리 |
-| 2026-04-14 | 2.0.2 | 과제 제출 `.zip` 업로드 검증 규칙 신설. 확장자 화이트리스트(`.ppx`)·용량·압축률·파일 수 상한·zip bomb 방어. Python `zipfile` 기반, Rust 개입 없음. |
+| 2026-04-14 | 2.0.1 | AI 스트리밍 경계를 FastAPI 중심으로 정리 |
+| 2026-04-14 | 2.0.2 | 과제 제출 `.zip` 업로드 검증 규칙 신설. 확장자 화이트리스트(`.ppx`)·용량·압축률·파일 수 상한·zip bomb 방어. Python `zipfile` 기반. |
 | 2026-04-14 | 2.0.3 | 과제 제출 확장자 화이트리스트 구체화(`.pdf`/`.png`/`.jpg`/`.jpeg`/`.webp`), 단건 직접 업로드 허용, 검증 순서 경로 분기(zip/단건) 명시, PDF 처리 경로(`pypdfium2` 텍스트 레이어 우선·혼합 PDF 페이지별 분기) 신설, 텔레그램 봇 허용 확장자 5종 명시. |
 | 2026-04-14 | 2.0.4 | 배치 채점 계약 확정 반영. § 17 내부 엔드포인트 신설 (`POST /internal/grading/batch-run`, `POST /internal/submissions/{submissionId}/ai-result`). 인증 방식 `X-Internal-Token` 명시. 과제 제출 엔드포인트 status를 `pending`(배치 대기)으로 변경, 채점 트리거 설명을 배치 채점(06/12/18/24시)으로 교체. 재제출 허용 구간(`pending`/`queued_for_batch`)·공식 점수 기준·`submission_retry` 테이블 명시. `rejected_reason` enum에 `ocr_all_failed` 추가. |
 | 2026-04-14 | 2.0.5 | 과제 파이프라인 신규(⑤⑥) + 텔레그램 봇 경계 명시 반영. `POST /assignments/generate` — `axes` 파라미터·`telegramSent` 응답 필드 추가, 관리자 수동 생성 모드 설명 추가. `GET /assignments/{id}/result` — `status`·`weakConceptsAdded` 응답 필드 추가, 채점 경로 안내(퀴즈 소크라테스 vs 과제 텔레그램) 추가. `POST /telegram/webhook` — 서버 경계(FastAPI 전담, Spring 미관여) 및 과제 파일 처리 흐름 4단계 명시. `POST /internal/grading/batch-run` — Daily Consolidation 구분표 추가, 채점 책임 분리(퀴즈→QAResponder / 과제→AssignmentGrader) 명시. `GET /reports/self-healing-memory` — 학생 복습 시스템 rename 예정 주석, 에이전트 메모리와의 구분 명시. |
 | 2026-04-14 | 2.0.6 | **P0 교정**: SSE 라인 재정의(FastAPI ②c 소크라테스 전용으로 한정). `POST /assignments/{id}/submit` 배치 채점 설명 삭제, `status=pending`·`nextBatchAt` 필드 삭제 → `status=submitted`로 변경. `POST /assignments/{id}/submit/telegram` 전면 재작성 — Spring Boot/OCR/photo/document/pdf/zip/png/jpg 참조 삭제, 허용 파일 `.py`/`.txt`, mimeType `text/x-python`/`text/plain`, 상태 `GRADING`으로 변경. `POST /telegram/webhook` 과제 파일 처리 흐름 4단계 재작성(OCR 삭제, AssignmentGrader 즉시 채점으로). 텔레그램 메시지 유형 표 교정. `POST /internal/grading/batch-run` 섹션 폐지 처리(엔드포인트 삭제, 폐지 안내로 대체). |
 | 2026-04-14 | 2.0.7 | **P0-v2 재교정**: `POST /assignments/{id}/submit/telegram` 허용 파일 형식을 `.py`/`.txt` 2종에서 `.py`/`.txt`/`.md`/`.png`/`.jpg`/`.jpeg`/`.webp`/`.pdf`/`.zip`/`.mp3`/`.m4a`/`.wav` 다형식으로 원복·확장. AssignmentGrader 파일 타입별 처리 분기(이미지/PDF→①a OCR, 음성→Qwen3-ASR, .py→AST, .txt/.md→자유서술, .zip→해제 후 분기) 명시. 응답 `status` 값 `"GRADING"` → `"grading"` (소문자 enum 통일). `POST /telegram/webhook` 과제 파일 처리 흐름·메시지 유형 표 다형식으로 재교정. `status_transition` 필드 값 `rejected`/`ocr_running` 제거 → `done`/`failed`/`grading` 3종으로 교정. |
-| 2026-04-17 | 2.0.9 | 문서 동기화 — lib-rust PyO3 전환 + OCR ONNX-only + SSE 전역 미사용 반영. 아키텍처 원칙 OCR/SSE/Modal 서술 갱신. 파일 타입 처리 경로 표·텔레그램 웹훅 흐름에서 Qwen-VL/PaddleOCR 혼용 표현 → ONNX Runtime CPU 단일 경로로 교체. |
+| 2026-04-17 | 2.0.9 | 문서 동기화 — OCR ONNX-only + SSE 전역 미사용 반영. 아키텍처 원칙 OCR/SSE/Modal 서술 갱신. 파일 타입 처리 경로 표·텔레그램 웹훅 흐름에서 Qwen-VL/PaddleOCR 혼용 표현 → ONNX Runtime CPU 단일 경로로 교체. |
 | 2026-04-20 | 2.1.0 | 암기노트 슬라이드 기반 재설계 반영. `GET /assignments/{id}/memo-note` 삭제(과제 기반 플래시카드·에빙하우스 망각곡선 복습 시스템 전면 제거). `GET /slides/{id}/memo-note` + `GET /courses/{id}/memo-notes` 신설(§ 6 과제 API 절 내 배치). `GET /calendar/review-schedule` 전체 삭제. 캘린더 응답 예시에서 에빙하우스 1일차 이벤트 데이터 제거. 엔드포인트 목록 테이블 동기화. |
 | 2026-04-20 | 2.2.0 | 요금제 v1.4 반영. § 13 구독/결제 API 전면 갱신 — Free/Plus/Pro 3종(9900원 폐기, 49900/99900원 신설), 플랜 features 응답 구조 교체(maxCourses/maxSlidesPerCourse/telegramBot/canCustomizeTutor). 에러코드 PAY_004 수정("이미 프리미엄 → 이미 해당 플랜"), PREMIUM_001 폐기 → PLAN_001·QUOTA_001·QUOTA_002 신설. subscriptionTier 응답 값 FREE/PLUS/PRO/EXPIRED로 교체. checkout planId 허용값 교체. |
 | 2026-04-20 | 2.1.1 | 과제 형식 L2 검증 방식 확정 반영. `POST /assignments/generate` 요청에 `expectedInputType`(필수)·`allowedExtensions`(선택) 추가, 응답에 동일 두 필드 추가. `POST /assignments/{id}/submit/telegram` 에러 응답에 `415 REJECTED_TYPE_MISMATCH` 추가 + L2 거절 응답 예시 추가. 400 VALIDATION_001 설명에 `expectedInputType` 미지정 케이스 명시. |
@@ -6366,6 +6365,6 @@ AI 코인 1개를 사용하여 모의고사를 생성한다. `POST /exam-forges`
 | 2026-04-29 | 2.7.0 | ChapterStudio_V1 학습 화면 채팅 계약 추가. `POST /tutoring/{id}/lessons/{lessonId}/chat/stream`는 현재 강의·슬라이드·음성대본·핵심노트·퀴즈 맥락을 FastAPI가 DB에서 읽어 사용자 맞춤 답변을 스트리밍한다. 운영 모델은 FastAPI connector 설정으로 정한다. |
 | 2026-04-20 | 2.3.0 | 요금제 v1.5 반영. 플랜 명칭 변경(Plus→Pro, Pro→Premium). subscriptionTier 응답값 FREE/PRO/PREMIUM/EXPIRED로 교체. § 13 구독/결제 플랜 ID/이름 교체. 모의고사 생성 AI 코인 1개 소모 명시. AI 코인 관련 엔드포인트를 추가했다. 업그레이드(prorated)/다운그레이드(다음 결제 주기) 플랜 변경 엔드포인트 추가. |
 | 2026-04-20 | 2.2.0 | AI 튜터 CRUD (`/tutors/*`) 7개 + 암기노트 검색 (`/memo-notes/search`) 1개 신규 추가. (UI 결정 내용은 `00_개요/페이지별_기능정리.md` PAGE 18에 있음) |
-| 2026-06-07 | — | OCR 아키텍처 확정: ①a 과제는 **Sonnet 4.6 VLM 직접 처리** (OCR 레이어 없음). ①c 교재·범용 PDF는 **OCR_V1(Marker+MinerU 이중 엔진)** 단일 경로. ①b(PaddleOCR ONNX+lib-rust PyO3 단일 경로 및 PaddleOCR-VL-1.5 Modal A10) 경로 폐기됨. Spring↔FastAPI 콜백 계약 (`ocr_text`, `ai_confidence` 등 필드)은 유지됨. |
+| 2026-06-07 | — | OCR 아키텍처 확정: ①a 과제는 **Sonnet 4.6 VLM 직접 처리** (OCR 레이어 없음). ①c 교재·범용 PDF는 **OCR_V1(Marker+MinerU 이중 엔진)** 단일 경로. ①b(PaddleOCR ONNX 단일 경로 및 PaddleOCR-VL-1.5 Modal A10) 경로 폐기됨. Spring↔FastAPI 콜백 계약 (`ocr_text`, `ai_confidence` 등 필드)은 유지됨. |
 | 2026-04-22 | — | 프론트엔드 기술 스택에 shadcn/ui를 공식 편입. |
 | 2026-11-02 | — | 포트폴리오 정리: 상단 변경 배너를 이 표로 옮김. 아키텍처 개요와 과제 채점 경로의 OCR 서술을 현행(Sonnet VLM 직접 처리, OCR_V1)으로 맞춤. |

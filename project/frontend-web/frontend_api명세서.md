@@ -17,7 +17,7 @@
 | 실제 존재하는 뷰 파일 | 22개 (`src/views/*.tsx`) |
 | 추가된 테스트용 뷰 | `StudyCalendar`, `TelegramHub`, `AdminConsole` |
 | 실제 API 호출 코드 | 없음. `fetch`, `axios`, 전용 API client 검색 결과 0건이다. |
-| base URL 상태 | `src/core/env.ts`에 `apiSpring`, `apiFastapi`, `apiRust`가 정의되어 있으나 현재 import/사용 코드가 없다. |
+| base URL 상태 | `src/core/env.ts`에 `apiSpring`, `apiFastapi`가 정의되어 있으나 현재 import/사용 코드가 없다. |
 | 공유 mock 데이터 | `src/lib.tsx`의 `COURSES_DATA`, `TWEAKS_DEFAULTS` |
 | 로컬 영속 상태 | `App.tsx`의 `route`, `activeCourseId`, `coins`, `plan`, `tweaks_state` / `TutorCustomize.tsx`의 `tutors_v1` |
 | 빌드 상태 | `npm run build` 성공 (2026-04-22 확인) |
@@ -117,7 +117,7 @@
 
 ### 4-3. 실제 API 호출 부재
 
-- `frontend-web/src` 전체 검색 기준 `fetch(`, `axios`, `apiSpring`, `apiFastapi`, `apiRust` 사용처가 없다.
+- `frontend-web/src` 전체 검색 기준 `fetch(`, `axios`, `apiSpring`, `apiFastapi` 사용처가 없다.
 - 즉, 현재 화면 간 연결은 `setRoute()`와 local state만으로 동작한다.
 
 ---
@@ -140,7 +140,7 @@
 | API 계층 생성 | `src/api/` 또는 `src/services/`에 도메인별 client를 만들고, 화면 컴포넌트에서 직접 호출하지 않도록 분리해야 한다. |
 | 응답 DTO 표준화 | `Docs/02_API/Spring_API.md`의 공통 응답 래퍼(`success`, `data`, `message`, `timestamp`) 기준으로 프론트 타입을 먼저 정의해야 한다. |
 | 전역 앱 상태 재설계 | `COURSES_DATA`, `coins`, `plan`, `tutor`는 API 응답을 받아 저장하는 전역 store가 필요하다. |
-| 환경변수 정리 | `.env.example`에 `VITE_API_BASE_RUST`는 추가했다. 다음 단계는 실제 사용 여부를 결정해 `env.ts`를 호출 계층과 연결하는 것이다. |
+| 환경변수 정리 | 다음 단계는 실제 사용 여부를 결정해 `env.ts`를 호출 계층과 연결하는 것이다. |
 
 ### 정책/명세 불일치
 

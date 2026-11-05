@@ -16,8 +16,6 @@ export const env = {
   // Spring Boot: 메인 REST API와 SSE 실시간 강의 스트리밍
   // 빈 값이면 client.ts가 same-origin /api 로 폴백한다.
   apiSpring: optionalApiBase(import.meta.env.VITE_API_BASE_SPRING, 'VITE_API_BASE_SPRING'),
-  // Rust OCR 서버: 이미지 전처리와 OCR gRPC 파이프라인 (FastAPI와 연동)
-  apiRust: optionalApiBase(import.meta.env.VITE_API_BASE_RUST, 'VITE_API_BASE_RUST'),
   // FastAPI + Celery: AI 파이프라인 (Claude, Modal GPU, OCR 추론)
   apiFastapi: optionalApiBase(import.meta.env.VITE_API_BASE_FASTAPI, 'VITE_API_BASE_FASTAPI'),
   // Google OAuth: Google Identity Services로 ID Token을 받을 때 쓰는 공개 Client ID

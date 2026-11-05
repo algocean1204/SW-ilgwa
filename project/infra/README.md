@@ -114,7 +114,7 @@ infra/
 ├── schema/                  # PostgreSQL DDL 기준 위치
 │   ├── init/                # 컨테이너 최초 기동 시 1회 실행
 │   ├── migrations/          # Flyway 버전 마이그레이션
-│   └── reference-models/    # ORM 매핑 참고용 (java/python/rust)
+│   └── reference-models/    # ORM 매핑 참고용 (java/python)
 ├── docker-templates/        # 서비스별 Dockerfile 참고 템플릿
 ├── scripts/                 # dev-up.sh, dev-down.sh 등
 ├── docs/                    # 운영 가이드 문서
@@ -145,6 +145,5 @@ infra/
 | 레포 | 역할 |
 |---|---|
 | [backend-spring](https://github.com/SW-EZ-Team/backend-spring) | 메인 백엔드 |
-| [lib-rust](https://github.com/SW-EZ-Team/lib-rust) | OCR 전처리 PyO3 Rust 라이브러리 (wheel) |
 | [backend-fastapi](https://github.com/SW-EZ-Team/backend-fastapi) | AI 추론·OCR·채점 |
 | [frontend-web](https://github.com/SW-EZ-Team/frontend-web) | 웹 프론트엔드 |

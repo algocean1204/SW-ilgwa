@@ -2,7 +2,7 @@
 
 > 상태: 미구현 설계안. 아래 모듈(autoDream, MemoryPointerService 등)은 코드에 구현하지 않았다.  
 > 작성일: 2026-04-14  
-> 도메인 경계: FastAPI만 (Spring·Rust 관여 없음)  
+> 도메인 경계: FastAPI만 (Spring 관여 없음)  
 > AI 파이프라인(FastAPI) 안에서는 SSE를 쓰지 않는다. ②c 질답·퀴즈 소크라테스 스트리밍은 HTTP chunked `StreamingResponse`로만 처리한다. Spring Boot도 강의·알림 SseEmitter 없이 REST 상태 조회나 다음 요청 piggyback을 쓴다. (2026-04-29 정리) 예외는 Chat_V1 `POST /api/chat/v1/ask/stream` 하나로, 채팅 답변을 SSE로 흘려보낸다.
 
 ---
@@ -34,7 +34,6 @@ ERD가 이미 이 개념에 맞으므로 새 테이블은 필요 없다.
 
 - Self-Healing Memory는 FastAPI에만 둔다.
 - Spring은 조회를 넘겨주는 프록시만 한다.
-- Rust는 관여하지 않는다.
 - FastAPI AI 파이프라인 안에서는 SSE를 쓰지 않는다. 예외는 Chat_V1 `POST /api/chat/v1/ask/stream` 하나로, 채팅 답변을 SSE로 흘려보낸다. 완료 통지는 polling이나 다음 요청 piggyback으로 한다. Spring Boot도 강의·알림 SseEmitter를 구현하지 않는다.
 
 ---
@@ -254,7 +253,7 @@ Qdrant 임베딩은 에이전트 메모리 레이어에 넣지 않는다. RAG �
 
 | 항목 | 내용 | 결정일 |
 |---|---|---|
-| 도메인 경계 | FastAPI만. Spring은 프록시, Rust 관여 없음 | — |
+| 도메인 경계 | FastAPI만. Spring은 프록시 | — |
 | SSE 금지 | 완료 통지 불가. 폴링 또는 piggyback 사용 | 2026-04-14 |
 | Python 버전 | Python 3.12 | — |
 | FastAPI 버전 | 0.115.5 | — |

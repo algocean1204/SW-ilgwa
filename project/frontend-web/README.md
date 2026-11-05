@@ -59,7 +59,6 @@ cp .env.example .env
 | 변수명 | 설명 | 기본값 |
 |--------|------|--------|
 | `VITE_API_BASE_SPRING` | Spring Boot REST 엔드포인트 | `http://localhost:8080` |
-| `VITE_API_BASE_RUST` | Rust 전처리 경계용 값. 프론트에서 직접 호출하지 않는다 | `http://localhost:8081` |
 | `VITE_API_BASE_FASTAPI` | FastAPI AI 파이프라인 (Claude · Modal GPU · OCR) | `http://localhost:8082` |
 
 ## 폴더 구조
@@ -91,5 +90,4 @@ docker run -p 3000:3000 frontend-web
 ## 관련 저장소
 
 - [backend-spring](https://github.com/SW-EZ-Team/backend-spring): Spring Boot 메인 API 백엔드
-- [lib-rust](https://github.com/SW-EZ-Team/lib-rust): PDF/이미지 전처리 PyO3 Rust 라이브러리 (FastAPI가 in-process로 사용)
 - [backend-fastapi](https://github.com/SW-EZ-Team/backend-fastapi): FastAPI AI 파이프라인 백엔드
