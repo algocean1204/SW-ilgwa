@@ -46,7 +46,7 @@ class OCRPipelineResult(BaseModel):
     )
     rasterizer_backend: str = Field(
         default="unknown",
-        description="PDF 래스터화에 사용된 백엔드 (lib-rust 또는 pypdfium2)",
+        description="PDF 래스터화에 사용된 백엔드 (pypdfium2)",
     )
     ocr_model: str = Field(
         default="",
